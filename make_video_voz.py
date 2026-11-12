@@ -1,14 +1,20 @@
 #!/usr/bin/env python3
 """Gera o vídeo do Clóvis COM NARRAÇÃO: TTS -> timeline dinâmica -> render -> mux."""
-import subprocess, wave, os, sys
+import subprocess, wave, os, sys, asyncio
 import numpy as np
 import imageio_ffmpeg
-from gtts import gTTS
+import edge_tts
 import render_video as r
+import scenes_v2
 
 FF = imageio_ffmpeg.get_ffmpeg_exe()
 SR = 24000
 TMP = '/tmp/tts'
+VOZ_NARRADOR = 'pt-BR-AntonioNeural'
+VOZ_CLOVIS   = 'pt-BR-AntonioNeural'
+CLV_RATE  = '+12%'
+CLV_PITCH = '+30Hz'
+NAR_RATE  = '-4%'
 
 LINES = [
     dict(sid=0,  sp='NARRADOR', text='Ei, Clóvis! Você está na hora de acordar... já são 5 horas!'),
@@ -29,14 +35,20 @@ MIN_DUR = {0: 6.0, 1: 5.0, 2: 2.5, 3: 5.0, 4: 5.0, 5: 5.0, 6: 7.2, 7: 7.2, 8: 7.
            9: 5.0, 10: 5.0, 11: 8.0}
 TAIL = {0: 0.6, 1: 0.9, 3: 0.7, 4: 0.7, 5: 0.7, 6: 2.2, 7: 2.2, 8: 2.2, 9: 0.7, 10: 0.7, 11: 1.5}
 
-def synth_all():
+async def _tts(text, out, voice, rate, pitch):
+    com = edge_tts.Communicate(text, voice, rate=rate, pitch=pitch)
+    await com.save(out)
+
+async def synth_all_async():
     os.makedirs(TMP, exist_ok=True)
-    wavs = []
     for i, ln in enumerate(LINES):
         mp3 = f'{TMP}/l{i}.mp3'
         wav = f'{TMP}/l{i}.wav'
         if not os.path.exists(wav):
-            gTTS(ln['text'], lang='pt-br').save(mp3)
+            if ln['sp'] == 'CLÓVIS':
+                await _tts(ln['text'], mp3, VOZ_CLOVIS, CLV_RATE, CLV_PITCH)
+            else:
+                await _tts(ln['text'], mp3, VOZ_NARRADOR, NAR_RATE, '+0Hz')
             subprocess.run([FF, '-y', '-i', mp3, '-ar', str(SR), '-ac', '1',
                             '-f', 's16le', wav], check=True,
                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -46,7 +58,9 @@ def synth_all():
         ln['dur'] = dur
         ln['samples'] = samples
         print(f"  fala {i:2d} ({ln['sp']:8s}) {dur:4.1f}s: {ln['text'][:50]}")
-    return wavs
+
+def synth_all():
+    asyncio.run(synth_all_async())
 
 def build_schedule():
     scene_dur = {}
@@ -80,7 +94,7 @@ def build_schedule():
     return scene_times, subs, audio, total
 
 def main():
-    print('1/4 Sintetizando falas (gTTS pt-BR)...')
+    print('1/4 Sintetizando falas (Edge TTS pt-BR)...')
     synth_all()
     print('2/4 Montando timeline...')
     scene_times, subs, audio, total = build_schedule()
@@ -89,6 +103,7 @@ def main():
     r.SCENE_TIMES = scene_times
     r.SUBS = subs
     r.DUR = total
+    r.scene_at = scenes_v2.scene_at_v2
     r.OUT = '/tmp/clovis_mudo.mp4'
     print('3/4 Renderizando vídeo...')
     r.main()

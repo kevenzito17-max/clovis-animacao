@@ -1,0 +1,3 @@
+Coloque aqui a imagem do personagem 2D com o nome clovis_sprite.png
+(fundo transparente de preferência, personagem em pé, corpo inteiro).
+O renderizador usa automaticamente esse arquivo nas cenas.
