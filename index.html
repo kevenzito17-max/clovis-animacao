@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clóvis: A Rotina das 5 da Manhã</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #101318;
+    font-family: 'Trebuchet MS', 'Segoe UI', sans-serif;
+    display: flex; flex-direction: column; align-items: center;
+    min-height: 100vh; padding: 16px;
+  }
+  h1 { color: #ffd166; font-size: 22px; margin-bottom: 10px; letter-spacing: 1px; }
+
+  #stage-wrap { position: relative; width: min(920px, 96vw); }
+  #stage {
+    position: relative; width: 100%; aspect-ratio: 16 / 9;
+    background: #22304a; border-radius: 14px; overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0,0,0,.6);
+  }
+  .scene {
+    position: absolute; inset: 0; opacity: 0; pointer-events: none;
+    transition: opacity .6s ease;
+  }
+  .scene.active { opacity: 1; }
+
+  /* ---------- Céu / fundos ---------- */
+  .sky-night  { background: linear-gradient(#0b1026 0%, #1b2440 60%, #2c3a5c 100%); }
+  .sky-dawn   { background: linear-gradient(#2b3a67 0%, #6b5b95 45%, #e8985e 100%); }
+  .sky-day    { background: linear-gradient(#7ec8e3 0%, #bde0fe 70%, #ffe8c2 100%); }
+  .sky-dusk   { background: linear-gradient(#3a2f5b 0%, #b56576 55%, #f4a261 100%); }
+  .indoor     { background: linear-gradient(#3d3a50 0%, #57506e 100%); }
+
+  .stars { position: absolute; inset: 0; }
+  .star { position: absolute; width: 3px; height: 3px; background: #fff; border-radius: 50%; animation: twinkle 2s infinite ease-in-out; }
+  @keyframes twinkle { 0%,100% { opacity: .2 } 50% { opacity: 1 } }
+
+  .sun, .moon {
+    position: absolute; top: 12%; left: 70%; width: 70px; height: 70px; border-radius: 50%;
+  }
+  .moon { background: #f4f1de; box-shadow: 0 0 40px #f4f1de88; }
+  .sun  { background: #ffd166; box-shadow: 0 0 60px #ffd166aa; animation: rise 6s ease forwards; }
+  @keyframes rise { from { transform: translateY(120px); } to { transform: translateY(0); } }
+
+  .ground {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 22%;
+    background: #3a4a5f; border-top: 4px solid #2b3850;
+  }
+  .road {
+    position: absolute; bottom: 6%; left: 0; right: 0; height: 16%;
+    background: #2c3444; border-top: 3px dashed #f4f1de55;
+  }
+
+  /* ---------- Cama / quarto ---------- */
+  .bed {
+    position: absolute; bottom: 12%; left: 12%; width: 300px; height: 120px;
+    background: #7f5af0; border-radius: 16px 16px 6px 6px;
+  }
+  .bed::before {
+    content: ''; position: absolute; top: -34px; left: 10px; width: 90px; height: 60px;
+    background: #c1b8f7; border-radius: 10px;
+  }
+  .blanket { position: absolute; bottom: 0; left: 60px; right: 0; top: 30px; background: #ef476f; border-radius: 12px; }
+  .pillow  { position: absolute; top: 6px; left: 12px; width: 90px; height: 34px; background: #fdfdfd; border-radius: 10px; }
+
+  .clock {
+    position: absolute; top: 14%; right: 12%; width: 130px; height: 90px;
+    background: #1d1d2b; border: 5px solid #ef476f; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Courier New', monospace; font-size: 38px; font-weight: bold; color: #ff5d5d;
+    box-shadow: 0 0 24px #ef476f66; animation: clockPulse 1s infinite;
+  }
+  @keyframes clockPulse { 0%,100% { box-shadow: 0 0 18px #ef476f66 } 50% { box-shadow: 0 0 44px #ef476fcc } }
+  .clock.zzz { animation: none; color: #9aa; border-color: #444; box-shadow: none; }
+
+  .zzz {
+    position: absolute; font-weight: bold; color: #cfd8ff; font-size: 26px;
+    animation: floatUp 2.4s infinite ease-out;
+  }
+  @keyframes floatUp { from { opacity: 0; transform: translateY(0) } 30% { opacity: 1 } to { opacity: 0; transform: translateY(-70px) } }
+
+  /* ---------- Personagem Clóvis ---------- */
+  .clovis { position: absolute; width: 90px; height: 170px; transition: all .8s ease; }
+  .clovis .head {
+    position: absolute; top: 0; left: 20px; width: 52px; height: 52px;
+    background: #f2c29b; border-radius: 50%; position: relative;
+  }
+  .clovis .hair { position: absolute; top: -6px; left: 2px; right: 2px; height: 20px; background: #3c2f2f; border-radius: 26px 26px 4px 4px; }
+  .clovis .eye {
+    position: absolute; top: 22px; width: 8px; height: 8px; background: #222; border-radius: 50%;
+  }
+  .clovis .eye.l { left: 12px; } .clovis .eye.r { right: 12px; }
+  .clovis .eye.closed { height: 2px; top: 26px; border-radius: 2px; }
+  .clovis .mouth {
+    position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
+    width: 16px; height: 8px; border-bottom: 3px solid #a4552f; border-radius: 0 0 12px 12px;
+  }
+  .clovis .mouth.flat { height: 2px; border: none; background: #a4552f; border-radius: 2px; }
+  .clovis .mouth.sad { border-bottom: none; border-top: 3px solid #a4552f; border-radius: 12px 12px 0 0; }
+  .clovis .body {
+    position: absolute; top: 52px; left: 12px; width: 66px; height: 66px;
+    background: #2a9d8f; border-radius: 16px;
+  }
+  .clovis .arm {
+    position: absolute; top: 58px; width: 14px; height: 52px; background: #2a9d8f; border-radius: 8px;
+  }
+  .clovis .arm.l { left: 0; } .clovis .arm.r { right: 0; }
+  .clovis .leg {
+    position: absolute; top: 118px; width: 18px; height: 52px; background: #35495e; border-radius: 8px;
+  }
+  .clovis .leg.l { left: 18px; } .clovis .leg.r { right: 18px; }
+  .clovis .shoe { position: absolute; bottom: -4px; width: 24px; height: 12px; background: #222; border-radius: 8px 4px 4px 4px; }
+
+  .clovis.lying { transform: rotate(90deg) translate(30px, -30px); }
+  .clovis.sitting { transform: translateY(30px) scaleY(.92); }
+  .clovis.sitting .leg { height: 30px; top: 128px; }
+  .clovis.walking { animation: walk .6s infinite ease-in-out; }
+  @keyframes walk { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-8px) } }
+  .clovis.walking .arm.l { animation: swing .6s infinite ease-in-out; }
+  .clovis.walking .arm.r { animation: swing .6s infinite ease-in-out reverse; }
+  @keyframes swing { 0%,100% { transform: rotate(12deg) } 50% { transform: rotate(-12deg) } }
+  .clovis.tired .eye { background: #222; }
+
+  /* ---------- Balões de fala ---------- */
+  .bubble {
+    position: absolute; max-width: 55%; padding: 14px 18px;
+    background: #fff; color: #222; border-radius: 14px; font-size: 17px; line-height: 1.35;
+    opacity: 0; transform: translateY(10px) scale(.95); transition: all .35s ease;
+    box-shadow: 0 6px 20px rgba(0,0,0,.35); z-index: 10;
+  }
+  .bubble.show { opacity: 1; transform: translateY(0) scale(1); }
+  .bubble::after {
+    content: ''; position: absolute; bottom: -14px; left: 40px;
+    border: 8px solid transparent; border-top-color: #fff;
+  }
+  .bubble.narrator {
+    left: 50%; bottom: 4%; transform: translateX(-50%) translateY(10px);
+    background: #ffd166; font-style: italic; text-align: center; max-width: 78%;
+  }
+  .bubble.narrator.show { transform: translateX(-50%) translateY(0); }
+  .bubble.narrator::after { display: none; }
+  .bubble.right { right: 6%; } .bubble.right::after { left: auto; right: 40px; }
+
+  .speaker { display: block; font-size: 12px; font-weight: bold; color: #888; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 1px; }
+  .narrator .speaker { color: #b07d2b; }
+
+  /* ---------- Objetos das cenas ---------- */
+  .table {
+    position: absolute; bottom: 12%; left: 30%; width: 260px; height: 16px; background: #8d6e4a; border-radius: 4px;
+  }
+  .table::before, .table::after {
+    content: ''; position: absolute; top: 16px; width: 12px; height: 70px; background: #6d5236;
+  }
+  .table::before { left: 20px; } .table::after { right: 20px; }
+  .mug {
+    position: absolute; bottom: calc(12% + 16px); left: 38%; width: 34px; height: 30px;
+    background: #ef476f; border-radius: 4px 4px 10px 10px;
+  }
+  .mug::after { content: ''; position: absolute; right: -12px; top: 4px; width: 14px; height: 18px; border: 5px solid #ef476f; border-radius: 50%; }
+  .steam { position: absolute; width: 8px; height: 22px; background: #ffffff55; border-radius: 50%; animation: floatUp 2s infinite; }
+  .bread { position: absolute; bottom: calc(12% + 16px); left: 47%; width: 46px; height: 22px; background: #d9a05b; border-radius: 12px; }
+
+  .sink {
+    position: absolute; bottom: 22%; right: 10%; width: 200px; height: 60px; background: #e0e0e0; border-radius: 10px;
+  }
+  .sink::before { content: ''; position: absolute; top: -26px; left: 70px; width: 14px; height: 30px; background: #aaa; border-radius: 6px; }
+  .mirror {
+    position: absolute; top: 12%; right: 8%; width: 150px; height: 110px;
+    background: linear-gradient(135deg, #bde0fe, #e8f4ff); border: 8px solid #8d6e4a; border-radius: 14px;
+  }
+  .toothbrush {
+    position: absolute; bottom: calc(22% + 58px); right: 16%; width: 60px; height: 10px;
+    background: #06d6a0; border-radius: 6px; transform: rotate(-20deg);
+  }
+  .toothbrush::after { content: ''; position: absolute; left: -12px; top: -2px; width: 14px; height: 8px; background: #fff; border-radius: 3px; }
+
+  .bus-stop-sign {
+    position: absolute; bottom: 22%; left: 14%; width: 10px; height: 130px; background: #888;
+  }
+  .bus-stop-sign::before {
+    content: 'ÔNIBUS'; position: absolute; top: -34px; left: -45px; width: 110px; padding: 6px 0;
+    background: #ffd166; color: #333; text-align: center; font-weight: bold; font-size: 13px; border-radius: 6px;
+  }
+
+  .bus {
+    position: absolute; bottom: 8%; width: 260px; height: 120px; background: #e76f51; border-radius: 14px;
+    display: flex; align-items: center; gap: 8px; padding: 10px;
+  }
+  .bus .win { flex: 1; height: 44px; background: #bde0fe; border-radius: 6px; }
+  .bus .wheel { position: absolute; bottom: -14px; width: 34px; height: 34px; background: #222; border-radius: 50%; }
+  .bus .wheel.l { left: 30px; } .bus .wheel.r { right: 30px; }
+  .bus.drive-in { animation: driveIn 2.4s ease forwards; }
+  .bus.drive-out { animation: driveOut 2.4s ease forwards; }
+  @keyframes driveIn  { from { left: -300px; } to { left: 8%; } }
+  @keyframes driveOut { from { left: 8%; } to { left: 105%; } }
+  .bus.metro { background: #118ab2; border-radius: 18px 18px 8px 8px; }
+  .bus.metro .stripe { position: absolute; top: 60px; left: 0; right: 0; height: 10px; background: #ffd166; }
+
+  .office-desk {
+    position: absolute; bottom: 14%; width: 220px; height: 14px; background: #8d6e4a; border-radius: 4px;
+  }
+  .coworker { position: absolute; bottom: calc(14% + 14px); width: 60px; height: 110px; }
+  .coworker .head { position: absolute; top: 0; left: 12px; width: 36px; height: 36px; border-radius: 50%; }
+  .coworker .torso { position: absolute; top: 36px; left: 4px; width: 52px; height: 60px; border-radius: 12px; }
+  .coworker .back-head { position: absolute; top: 4px; left: 6px; width: 24px; height: 16px; background: rgba(0,0,0,.15); border-radius: 10px; }
+
+  .city {
+    position: absolute; bottom: 22%; left: 0; right: 0; height: 34%;
+    display: flex; align-items: flex-end; justify-content: space-around; padding: 0 4%;
+  }
+  .building { width: 12%; height: 70%; background: #2b3850; border-radius: 6px 6px 0 0; position: relative; }
+  .building::before {
+    content: ''; position: absolute; inset: 12% 18%;
+    background: repeating-linear-gradient(#ffd16633 0 10px, transparent 10px 22px);
+  }
+
+  /* ---------- Painel dos 5 dias ---------- */
+  #week-panel {
+    position: absolute; inset: 0; background: #141824; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 14px; padding: 4%;
+  }
+  #week-panel h2 { color: #ffd166; font-size: clamp(14px, 2.4vw, 24px); text-align: center; }
+  #week-cells { display: flex; gap: 10px; width: 100%; justify-content: center; }
+  .day-cell {
+    flex: 1; max-width: 150px; aspect-ratio: 1 / 1.15; background: #22304a;
+    border-radius: 10px; position: relative; overflow: hidden; border: 2px solid #3a4a6a;
+  }
+  .day-cell .label {
+    position: absolute; top: 0; left: 0; right: 0; padding: 4px 0; text-align: center;
+    background: #ef476f; color: #fff; font-weight: bold; font-size: clamp(9px, 1.4vw, 13px); z-index: 3;
+  }
+  .day-cell .mini-sky { position: absolute; inset: 0; background: linear-gradient(#2b3a67, #6b5b95 55%, #e8985e); }
+  .day-cell .mini-bed {
+    position: absolute; bottom: 8%; left: 14%; width: 55%; height: 22%;
+    background: #7f5af0; border-radius: 6px;
+  }
+  .day-cell .mini-guy {
+    position: absolute; bottom: 12%; right: 12%; width: 22%; height: 40%;
+  }
+  .day-cell .mini-guy .m-head { position: absolute; top: 0; left: 25%; width: 50%; height: 34%; background: #f2c29b; border-radius: 50%; }
+  .day-cell .mini-guy .m-body { position: absolute; top: 30%; left: 15%; width: 70%; height: 45%; background: #2a9d8f; border-radius: 6px; }
+  .day-cell .mini-guy.bobbing { animation: bob 1.6s infinite ease-in-out; }
+  @keyframes bob { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-12%) } }
+  .day-cell .mini-clock {
+    position: absolute; top: 26%; right: 8%; padding: 2px 6px; background: #1d1d2b;
+    border: 2px solid #ef476f; border-radius: 4px; color: #ff5d5d;
+    font-family: monospace; font-size: clamp(8px, 1.3vw, 12px); font-weight: bold;
+  }
+  .day-cell.active-day { border-color: #ffd166; box-shadow: 0 0 18px #ffd16666; }
+  .day-cell .check {
+    position: absolute; bottom: 4px; right: 6px; color: #06d6a0; font-weight: bold; font-size: 18px; opacity: 0; transition: opacity .4s;
+  }
+  .day-cell.done .check { opacity: 1; }
+
+  /* ---------- Controles ---------- */
+  #controls { display: flex; gap: 10px; margin-top: 14px; }
+  #controls button {
+    padding: 10px 22px; border: none; border-radius: 8px; font-size: 15px; font-weight: bold;
+    background: #ef476f; color: #fff; cursor: pointer; transition: transform .15s;
+  }
+  #controls button:hover { transform: scale(1.06); }
+  #controls button.secondary { background: #3a4a6a; }
+  #caption {
+    margin-top: 10px; color: #9fb0cc; font-size: 14px; min-height: 20px; text-align: center; max-width: 860px;
+  }
+</style>
+</head>
+<body>
+<h1>⏰ Clóvis: A Rotina das 5 da Manhã</h1>
+
+<div id="stage-wrap">
+  <div id="stage">
+
+    <!-- Cena 1: Quarto, 5h, narrador acorda -->
+    <div class="scene sky-night" id="s1">
+      <div class="stars" id="stars1"></div>
+      <div class="moon"></div>
+      <div class="city"><div class="building" style="height:80%"></div><div class="building" style="height:55%"></div><div class="building" style="height:68%"></div><div class="building" style="height:48%"></div></div>
+      <div class="ground"></div>
+      <div class="clock" id="clock1">5:00</div>
+      <div class="bed"><div class="pillow"></div><div class="blanket"></div></div>
+      <div class="clovis lying" id="clovis1" style="bottom:14%; left:20%;">
+        <div class="head"><div class="hair"></div><div class="eye l closed"></div><div class="eye r closed"></div><div class="mouth flat"></div></div>
+        <div class="body"></div><div class="arm l"></div><div class="arm r"></div><div class="leg l"><div class="shoe"></div></div><div class="leg r"><div class="shoe"></div></div>
+      </div>
+      <div class="zzz" style="bottom:60%; left:26%;">Z</div>
+      <div class="zzz" style="bottom:66%; left:30%; animation-delay:.8s;">z</div>
+      <div class="zzz" style="bottom:72%; left:24%; animation-delay:1.6s;">Z</div>
+      <div class="bubble narrator" id="b1"><span class="speaker">Narrador</span><span class="txt"></span></div>
+    </div>
+
+    <!-- Cena 2: Clóvis olha o relógio -->
+    <div class="scene sky-night" id="s2">
+      <div class="moon"></div>
+      <div class="ground"></div>
+      <div class="clock" id="clock2">5:00</div>
+      <div class="bed"><div class="pillow"></div><div class="blanket"></div></div>
+      <div class="clovis sitting" id="clovis2" style="bottom:14%; left:24%;">
+        <div class="head"><div class="hair"></div><div class="eye l"></div><div class="eye r closed"></div><div class="mouth sad"></div></div>
+        <div class="body"></div><div class="arm l"></div><div class="arm r"></div><div class="leg l"><div class="shoe"></div></div><div class="leg r"><div class="shoe"></div></div>
+      </div>
+      <div class="bubble" id="b2" style="bottom:52%; left:36%;"><span class="speaker">Clóvis</span><span class="txt"></span></div>
+      <div class="bubble narrator" id="b2n"><span class="speaker">Narrador</span><span class="txt"></span></div>
+    </div>
+
+    <!-- Cena 3: Clóvis levanta -->
+    <div class="scene sky-dawn" id="s3">
+      <div class="sun" style="top:30%;"></div>
+      <div class="city"><div class="building" style="height:80%"></div><div class="building" style="height:55%"></div><div class="building" style="height:68%"></div><div class="building" style="height:48%"></div></div>
+      <div class="ground"></div>
+      <div class="bed" style="left:8%;"><div class="pillow"></div><div class="blanket"></div></div>
+      <div class="clovis" id="clovis3" style="bottom:12%; left:46%;">
+        <div class="head"><div class="hair"></div><div class="eye l"></div><div class="eye r"></div><div class="mouth flat"></div></div>
+        <div class="body"></div><div class="arm l"></div><div class="arm r"></div><div class="leg l"><div class="shoe"></div></div><div class="leg r"><div class="shoe"></div></div>
+      </div>
+      <div class="bubble narrator" id="b3"><span class="speaker">Narrador</span><span class="txt"></span></div>
+    </div>
+
+    <!-- Cena 4: Café da manhã -->
+    <div class="scene indoor" id="s4">
+      <div class="ground" style="background:#4a4258;"></div>
+      <div class="mirror"></div>
+      <div class="table"></div>
+      <div class="mug"><div class="steam" style="top:-24px; left:10px;"></div><div class="steam" style="top:-24px; left:20px; animation-delay:.7s;"></div></div>
+      <div class="bread"></div>
+      <div class="clovis sitting" id="clovis4" style="bottom:16%; left:20%;">
+        <div class="head"><div class="hair"></div><div class="eye l"></div><div class="eye r"></div><div class="mouth flat"></div></div>
+        <div class="body"></div><div class="arm l"></div><div class="arm r"></div><div class="leg l"><div class="shoe"></div></div><div class="leg r"><div class="shoe"></div></div>
+      </div>
+      <div class="bubble narrator" id="b4"><span class="speaker">Narrador</span><span class="txt"></span></div>
+    </div>
+
+    <!-- Cena 5: Não escova os dentes -->
+    <div class="scene indoor" id="s5">
+      <div class="ground" style="background:#4a4258;"></div>
+      <div class="mirror"></div>
+      <div class="sink"></div>
+      <div class="toothbrush"></div>
+      <div class="clovis walking" id="clovis5" style="bottom:12%; left:16%;">
+        <div class="head"><div class="hair"></div><div class="eye l"></div><div class="eye r"></div><div class="mouth flat"></div></div>
+        <div class="body"></div><div class="arm l"></div><div class="arm r"></div><div class="leg l"><div class="shoe"></div></div><div class="leg r"><div class="shoe"></div></div>
+      </div>
+      <div class="bubble narrator" id="b5"><span class="speaker">Narrador</span><span class="txt"></span></div>
+    </div>
+
+    <!-- Cena 6: Primeiro ônibus -->
+    <div class="scene sky-dawn" id="s6">
+      <div class="sun" style="top:36%; left:80%; width:50px; height:50px;"></div>
+      <div class="city"><div class="building" style="height:75%"></div><div class="building" style="height:60%"></div><div class="building" style="height:82%"></div><div class="building" style="height:50%"></div></div>
+      <div class="road"></div>
+      <div class="ground" style="height:6%;"></div>
+      <div class="bus-stop-sign"></div>
+      <div class="bus drive-in" id="bus1"><div class="win"></div><div class="win"></div><div class="win"></div><div class="wheel l"></div><div class="wheel r"></div></div>
+      <div class="clovis" id="clovis6" style="bottom:8%; left:30%;">
+        <div class="head"><div class="hair"></div><div class="eye l"></div><div class="eye r"></div><div class="mouth flat"></div></div>
+        <div class="body"></div><div class="arm l"></div><div class="arm r"></div><div class="leg l"><div class="shoe"></div></div><div class="leg r"><div class="shoe"></div></div>
+      </div>
+      <div class="bubble narrator" id="b6"><span class="speaker">Narrador</span><span class="txt"></span></div>
+    </div>
+
+    <!-- Cena 7: Segundo ônibus -->
+    <div class="scene sky-day" id="s7">
+      <div class="sun" style="top:10%; left:78%;"></div>
+      <div class="city"><div class="building" style="height:70%"></div><div class="building" style="height:85%"></div><div class="building" style="height:58%"></div><div class="building" style="height:74%"></div></div>
+      <div class="road"></div>
+      <div class="ground" style="height:6%;"></div>
+      <div class="bus drive-in" id="bus2" style="background:#8ecae6;"><div class="win"></div><div class="win"></div><div class="win"></div><div class="wheel l"></div><div class="wheel r"></div></div>
+      <div class="clovis" id="clovis7" style="bottom:8%; left:32%;">
+        <div class="head"><div class="hair"></div><div class="eye l"></div><div class="eye r"></div><div class="mouth flat"></div></div>
+        <div class="body"></div><div class="arm l"></div><div class="arm r"></div><div class="leg l"><div class="shoe"></div></div><div class="leg r"><div class="shoe"></div></div>
+      </div>
+      <div class="bubble narrator" id="b7"><span class="speaker">Narrador</span><span class="txt"></span></div>
+    </div>
+
+    <!-- Cena 8: Metrô -->
+    <div class="scene" id="s8" style="background: linear-gradient(#1d1d2b 0%, #2c3444 70%, #222 100%);">
+      <div class="tunnel-lights" style="position:absolute; top:12%; left:0; right:0; height:8px; background: repeating-linear-gradient(90deg, #ffd166 0 40px, transparent 40px 90px); opacity:.5;"></div>
+      <div class="road" style="bottom:10%; border-top-color:#ffd16633;"></div>
+      <div class="bus metro drive-in" id="metro"><div class="stripe"></div><div class="win"></div><div class="win"></div><div class="win"></div><div class="win"></div><div class="wheel l"></div><div class="wheel r"></div></div>
+      <div class="clovis" id="clovis8" style="bottom:12%; left:34%;">
+        <div class="head"><div class="hair"></div><div class="eye l"></div><div class="eye r"></div><div class="mouth flat"></div></div>
+        <div class="body"></div><div class="arm l"></div><div class="arm r"></div><div class="leg l"><div class="shoe"></div></div><div class="leg r"><div class="shoe"></div></div>
+      </div>
+      <div class="bubble narrator" id="b8"><span class="speaker">Narrador</span><span class="txt"></span></div>
+    </div>
+
+    <!-- Cena 9: Chegada ao trabalho -->
+    <div class="scene indoor" id="s9" style="background: linear-gradient(#5a6478 0%, #7d8899 100%);">
+      <div class="ground" style="background:#6a6f7d;"></div>
+      <div class="office-desk" style="left:8%;"></div>
+      <div class="office-desk" style="left:40%;"></div>
+      <div class="office-desk" style="left:72%;"></div>
+      <div class="coworker" style="left:12%;"><div class="head" style="background:#c9ada7;"></div><div class="torso" style="background:#457b9d;"></div><div class="back-head"></div></div>
+      <div class="coworker" style="left:44%;"><div class="head" style="background:#e8c39e;"></div><div class="torso" style="background:#6d597a;"></div><div class="back-head"></div></div>
+      <div class="coworker" style="left:76%;"><div class="head" style="background:#b5838d;"></div><div class="torso" style="background:#355070;"></div><div class="back-head"></div></div>
+      <div class="clovis" id="clovis9" style="bottom:12%; left:2%;">
+        <div class="head"><div class="hair"></div><div class="eye l"></div><div class="eye r"></div><div class="mouth sad"></div></div>
+        <div class="body"></div><div class="arm l"></div><div class="arm r"></div><div class="leg l"><div class="shoe"></div></div><div class="leg r"><div class="shoe"></div></div>
+      </div>
+      <div class="bubble narrator" id="b9"><span class="speaker">Narrador</span><span class="txt"></span></div>
+    </div>
+
+    <!-- Cena 10: Fim do dia -->
+    <div class="scene sky-dusk" id="s10">
+      <div class="sun" style="top:52%; left:68%; background:#f4a261; box-shadow:0 0 60px #f4a261aa;"></div>
+      <div class="city"><div class="building" style="height:80%"></div><div class="building" style="height:55%"></div><div class="building" style="height:68%"></div><div class="building" style="height:48%"></div></div>
+      <div class="road"></div>
+      <div class="ground" style="height:6%;"></div>
+      <div class="clovis walking" id="clovis10" style="bottom:8%; left:20%;">
+        <div class="head"><div class="hair"></div><div class="eye l"></div><div class="eye r"></div><div class="mouth sad"></div></div>
+        <div class="body"></div><div class="arm l"></div><div class="arm r"></div><div class="leg l"><div class="shoe"></div></div><div class="leg r"><div class="shoe"></div></div>
+      </div>
+      <div class="bubble narrator" id="b10"><span class="speaker">Narrador</span><span class="txt"></span></div>
+    </div>
+
+    <!-- Cena 11: Painel dos 5 dias -->
+    <div class="scene" id="s11">
+      <div id="week-panel">
+        <h2>E Clóvis faz isso todo. Santo. Dia. 😴</h2>
+        <div id="week-cells">
+          <div class="day-cell" data-day="SEG"><div class="label">SEG</div><div class="mini-sky"></div><div class="mini-bed"></div><div class="mini-clock">5:00</div><div class="mini-guy bobbing"><div class="m-head"></div><div class="m-body"></div></div><div class="check">✔</div></div>
+          <div class="day-cell" data-day="TER"><div class="label">TER</div><div class="mini-sky"></div><div class="mini-bed"></div><div class="mini-clock">5:00</div><div class="mini-guy bobbing" style="animation-delay:.2s"><div class="m-head"></div><div class="m-body"></div></div><div class="check">✔</div></div>
+          <div class="day-cell" data-day="QUA"><div class="label">QUA</div><div class="mini-sky"></div><div class="mini-bed"></div><div class="mini-clock">5:00</div><div class="mini-guy bobbing" style="animation-delay:.4s"><div class="m-head"></div><div class="m-body"></div></div><div class="check">✔</div></div>
+          <div class="day-cell" data-day="QUI"><div class="label">QUI</div><div class="mini-sky"></div><div class="mini-bed"></div><div class="mini-clock">5:00</div><div class="mini-guy bobbing" style="animation-delay:.6s"><div class="m-head"></div><div class="m-body"></div></div><div class="check">✔</div></div>
+          <div class="day-cell" data-day="SEX"><div class="label">SEX</div><div class="mini-sky"></div><div class="mini-bed"></div><div class="mini-clock">5:00</div><div class="mini-guy bobbing" style="animation-delay:.8s"><div class="m-head"></div><div class="m-body"></div></div><div class="check">✔</div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div id="controls">
+    <button id="btn-play">▶ Começar</button>
+    <button id="btn-skip" class="secondary">⏭ Próxima cena</button>
+    <button id="btn-restart" class="secondary">↺ Reiniciar</button>
+  </div>
+  <div id="caption">Clique em "Começar" para iniciar a rotina do Clóvis. (Ative o som para ouvir as falas 🔊)</div>
+</div>
+
+<script>
+const stage = document.getElementById('stage');
+const caption = document.getElementById('caption');
+const scenes = [...document.querySelectorAll('.scene')];
+
+function say(bubbleId, speaker, text, speakIt = true, pitch = 1, rate = 1) {
+  const b = document.getElementById(bubbleId);
+  b.querySelector('.txt').textContent = text;
+  b.classList.add('show');
+  if (speakIt && 'speechSynthesis' in window) {
+    try {
+      const u = new SpeechSynthesisUtterance(speaker === 'Narrador' ? text : speaker + '. ' + text);
+      u.lang = 'pt-BR'; u.pitch = pitch; u.rate = rate;
+      const vs = speechSynthesis.getVoices();
+      const pt = vs.find(v => v.lang && v.lang.toLowerCase().startsWith('pt'));
+      if (pt) u.voice = pt;
+      speechSynthesis.speak(u);
+    } catch (e) {}
+  }
+}
+function hideBubbles() { document.querySelectorAll('.bubble').forEach(b => b.classList.remove('show')); }
+function showScene(i) { scenes.forEach((s, k) => s.classList.toggle('active', k === i)); }
+
+const wait = ms => new Promise(r => setTimeout(r, ms));
+
+async function playScene(i) {
+  hideBubbles();
+  showScene(i);
+  switch (i) {
+    case 0: { // Acorda
+      caption.textContent = 'Segunda-feira, 5 horas da manhã.';
+      const c = document.getElementById('clock1'); c.textContent = '5:00';
+      await wait(600);
+      say('b1', 'Narrador', 'Ei, Clóvis! Você está na hora de acordar... já são 5 horas!', true, 0.8, 0.95);
+      await wait(4200);
+      break;
+    }
+    case 1: { // Olha o relógio
+      caption.textContent = 'Clóvis abre um olho e olha pro relógio...';
+      const c = document.getElementById('clock2'); c.textContent = '5:00';
+      const cl = document.getElementById('clovis2');
+      cl.style.left = '30%';
+      await wait(800);
+      say('b2', 'Clóvis', 'Só mais 5 minutos...', true, 1.2, 0.85);
+      await wait(2600);
+      say('b2n', 'Narrador', 'Clóvis! Se você dormir mais 5 minutos, você vai atrasar. Você tem DOIS ônibus e um metrô pra pegar!', true, 0.8, 1);
+      await wait(5200);
+      break;
+    }
+    case 2: { // Levanta
+      caption.textContent = 'Clóvis levanta, arrastando os pés.';
+      const cl = document.getElementById('clovis3');
+      cl.classList.remove('lying');
+      await wait(400);
+      cl.style.left = '60%';
+      say('b3', 'Narrador', 'E então Clóvis levanta. Arrastando os pés, como sempre.', true, 0.8, 0.95);
+      await wait(3800);
+      break;
+    }
+    case 3: { // Café
+      caption.textContent = 'Café da manhã em velocidade recorde.';
+      say('b4', 'Narrador', 'Clóvis tenta tomar seu café... mas o relógio não perdoa: dois ônibus e um metrô esperam por ele.', true, 0.8, 0.95);
+      const cl = document.getElementById('clovis4');
+      cl.style.left = '34%';
+      await wait(4600);
+      break;
+    }
+    case 4: { // Não escova os dentes
+      caption.textContent = 'A escova fica pra lá... de novo.';
+      say('b5', 'Narrador', 'E Clóvis NÃO escova os dentes. Mais uma vez. Tudo pra pegar o primeiro ônibus.', true, 0.8, 0.95);
+      const cl = document.getElementById('clovis5');
+      cl.style.left = '48%';
+      await wait(4200);
+      break;
+    }
+    case 5: { // Primeiro ônibus
+      caption.textContent = 'Ônibus nº 1.';
+      say('b6', 'Narrador', 'Lá vem o primeiro ônibus. Clóvis mal consegue respirar.', true, 0.8, 0.95);
+      const cl = document.getElementById('clovis6');
+      setTimeout(() => cl.style.left = '55%', 2200);
+      await wait(4400);
+      break;
+    }
+    case 6: { // Segundo ônibus
+      caption.textContent = 'Ônibus nº 2.';
+      say('b7', 'Narrador', 'Agora o segundo ônibus. O dia mal começou e Clóvis já correu duas corridas.', true, 0.8, 0.95);
+      const cl = document.getElementById('clovis7');
+      setTimeout(() => cl.style.left = '58%', 2200);
+      await wait(4400);
+      break;
+    }
+    case 7: { // Metrô
+      caption.textContent = 'E o metrô.';
+      say('b8', 'Narrador', 'E por fim... o metrô. Lotado, apertado, silencioso.', true, 0.8, 0.95);
+      const cl = document.getElementById('clovis8');
+      setTimeout(() => cl.style.left = '60%', 2200);
+      await wait(4400);
+      break;
+    }
+    case 8: { // Trabalho
+      caption.textContent = 'Ninguém sorri pra Clóvis.';
+      say('b9', 'Narrador', 'Eis que Clóvis chega no trabalho... e ninguém dá um sorriso pra ele.', true, 0.8, 0.9);
+      const cl = document.getElementById('clovis9');
+      setTimeout(() => cl.style.left = '20%', 500);
+      await wait(4600);
+      break;
+    }
+    case 9: { // Fim do dia
+      caption.textContent = 'O dia acaba... e amanhã tem mais.';
+      say('b10', 'Narrador', 'O dia acaba. E Clóvis vai fazer a mesma rotina de amanhã de manhã.', true, 0.8, 0.9);
+      const cl = document.getElementById('clovis10');
+      setTimeout(() => cl.style.left = '70%', 300);
+      await wait(4600);
+      break;
+    }
+    case 10: { // Painel 5 dias
+      caption.textContent = 'Segunda, terça, quarta, quinta, sexta... e recomeça.';
+      const cells = [...document.querySelectorAll('.day-cell')];
+      cells.forEach(c => c.classList.remove('done', 'active-day'));
+      say('b10', 'Narrador', 'Clóvis faz isso todo dia.', true, 0.8, 0.9);
+      for (let k = 0; k < cells.length; k++) {
+        cells.forEach((c, j) => c.classList.toggle('active-day', j === k));
+        cells[k].classList.add('done');
+        await wait(700);
+      }
+      await wait(1800);
+      break;
+    }
+  }
+}
+
+let playing = false, current = 0, timer = null;
+
+async function runFrom(start) {
+  playing = true;
+  current = start;
+  while (playing && current < scenes.length) {
+    await playScene(current);
+    if (!playing) break;
+    current++;
+    if (current >= scenes.length) current = 0; // loop infinito: todo dia é igual
+  }
+}
+
+document.getElementById('btn-play').onclick = e => {
+  if (playing) return;
+  e.target.textContent = '⏸ Rodando...';
+  runFrom(0);
+};
+document.getElementById('btn-skip').onclick = () => { if (playing) current = (current + 1) % scenes.length; };
+document.getElementById('btn-restart').onclick = () => {
+  playing = false;
+  if ('speechSynthesis' in window) speechSynthesis.cancel();
+  document.querySelectorAll('.day-cell').forEach(c => c.classList.remove('done', 'active-day'));
+  hideBubbles();
+  setTimeout(() => {
+    document.getElementById('btn-play').textContent = '▶ Começar';
+    showScene(0); caption.textContent = 'Clique em "Começar" para iniciar a rotina do Clóvis.';
+  }, 100);
+};
+
+if ('speechSynthesis' in window) speechSynthesis.getVoices();
+
+// estrelas
+const stars1 = document.getElementById('stars1');
+for (let k = 0; k < 40; k++) {
+  const s = document.createElement('div');
+  s.className = 'star';
+  s.style.left = Math.random() * 100 + '%';
+  s.style.top = Math.random() * 55 + '%';
+  s.style.animationDelay = (Math.random() * 2) + 's';
+  stars1.appendChild(s);
+}
+</script>
+</body>
+</html>
