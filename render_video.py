@@ -439,8 +439,14 @@ def render_frame(t):
     for i, (a, b) in enumerate(SCENE_TIMES):
         if a <= t < b:
             img = scene_at(i, t - a)
+            if img.size != (W * S, H * S):
+                img = img.resize((W * S, H * S), Image.LANCZOS)
             if b - t < CROSS and i + 1 < len(SCENE_TIMES):
                 nxt = scene_at(i + 1, 0.0)
+                if nxt.size != img.size:
+                    nxt = nxt.resize(img.size, Image.LANCZOS)
+                if nxt.mode != img.mode:
+                    nxt = nxt.convert(img.mode)
                 img = Image.blend(img, nxt, (t - (b - CROSS)) / CROSS)
             return img
     return scene_week(t - SCENE_TIMES[-1][0])
