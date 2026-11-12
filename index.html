@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Clóvis: A Rotina das 5 da Manhã</title>
+<title>Cláudio: A Rotina das 5 da Manhã</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
@@ -108,9 +108,9 @@
   .char .mouth.sad { border-bottom: none; border-top: 2.5px solid #a4552f; border-radius: 10px 10px 0 0; }
   .char .neck { position: absolute; top: 44px; left: 33px; width: 10px; height: 8px; background: #e0a67c; }
   .char .torso { position: absolute; top: 50px; left: 12px; width: 52px; height: 58px;
-    background: linear-gradient(135deg, #2fa393, #23857a); border-radius: 14px 14px 10px 10px; }
+    background: linear-gradient(135deg, #3a7bd5, #2d5fa8); border-radius: 14px 14px 10px 10px; }
   .char .arm { position: absolute; top: 54px; width: 11px; height: 46px;
-    background: linear-gradient(#2fa393, #23857a); border-radius: 6px; transition: transform .5s ease; }
+    background: linear-gradient(#3a7bd5, #2d5fa8); border-radius: 6px; transition: transform .5s ease; }
   .char .arm.l { left: 1px; } .char .arm.r { right: 1px; }
   .char .hand { position: absolute; bottom: -7px; left: -1px; width: 13px; height: 13px; background: #efb98d; border-radius: 50%; }
   .char .leg { position: absolute; top: 106px; width: 15px; height: 56px;
@@ -243,7 +243,7 @@
   .day-cell .mini-guy .m-head { position: absolute; top: 0; left: 25%; width: 50%; height: 34%;
     background: #f6cba4; border-radius: 50%; }
   .day-cell .mini-guy .m-body { position: absolute; top: 30%; left: 15%; width: 70%; height: 46%;
-    background: #2fa393; border-radius: 5px; }
+    background: #3a7bd5; border-radius: 5px; }
   .day-cell .mini-guy.bobbing { animation: bob 1.5s infinite ease-in-out; }
   @keyframes bob { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-10%) } }
   .day-cell .mini-clock { position: absolute; top: 24%; right: 7%; padding: 1px 5px; background: #16161f;
@@ -264,7 +264,7 @@
 </style>
 </head>
 <body>
-<h1>⏰ Clóvis: A Rotina das 5 da Manhã</h1>
+<h1>⏰ Cláudio: A Rotina das 5 da Manhã</h1>
 
 <div id="stage-wrap">
   <div id="stage">
@@ -286,11 +286,11 @@
       <div class="zzz" style="bottom:58%; left:24%;">Z</div>
       <div class="zzz" style="bottom:64%; left:29%; animation-delay:.9s;">z</div>
       <div class="zzz" style="bottom:70%; left:22%; animation-delay:1.7s;">Z</div>
-      <div class="bubble" id="b-clovis-0" style="bottom:46%; left:38%;"><span class="speaker">Clóvis</span><span class="txt"></span></div>
+      <div class="bubble" id="b-clovis-0" style="bottom:46%; left:38%;"><span class="speaker">Cláudio</span><span class="txt"></span></div>
       <div class="bubble narrator" id="b0"><span class="speaker">Narrador</span><span class="txt"></span></div>
     </div>
 
-    <!-- Cena 2: Clóvis senta na cama -->
+    <!-- Cena 2: Cláudio senta na cama -->
     <div class="scene sky-night" id="s1">
       <div class="stars" id="stars1"></div>
       <div class="moon"></div>
@@ -430,7 +430,7 @@
     <!-- Cena 11: Painel dos 5 dias -->
     <div class="scene" id="s10">
       <div id="week-panel">
-        <h2>E Clóvis faz isso todo. Santo. Dia. 😴</h2>
+        <h2>E Cláudio faz isso todo. Santo. Dia. 😴</h2>
         <div id="week-cells">
           <div class="day-cell" data-day="SEG"><div class="label">SEG</div><div class="mini-sky"></div><div class="mini-bed"></div><div class="mini-clock">5:00</div><div class="mini-guy bobbing"><div class="m-head"></div><div class="m-body"></div></div><div class="check">✔</div></div>
           <div class="day-cell" data-day="TER"><div class="label">TER</div><div class="mini-sky"></div><div class="mini-bed"></div><div class="mini-clock">5:00</div><div class="mini-guy bobbing" style="animation-delay:.2s"><div class="m-head"></div><div class="m-body"></div></div><div class="check">✔</div></div>
@@ -514,14 +514,14 @@ function beep(times) {
 /* ---------- Roteiro (sequência corrigida e sincronizada) ---------- */
 const captions = [
   '5h da manhã — o despertador dispara.',
-  'Clóvis resiste.',
+  'Cláudio resiste.',
   'O alerta do narrador.',
   'Café da manhã em velocidade recorde.',
   'A escova de dentes fica pra lá... de novo.',
   'Primeiro ônibus.',
   'Segundo ônibus.',
   'E o metrô.',
-  'Ninguém sorri pra Clóvis.',
+  'Ninguém sorri pra Cláudio.',
   'O dia acaba.',
   'Segunda, terça, quarta, quinta, sexta... e recomeça.'
 ];
@@ -535,18 +535,18 @@ async function playScene(i) {
     case 0: {
       beep(3);
       await wait(500);
-      await say('b0', 'Narrador', 'Ei, Clóvis! Você está na hora de acordar... já são 5 horas!', { pitch: 0.85, rate: 0.98 });
+      await say('b0', 'Narrador', 'Ei, Cláudio! Você está na hora de acordar... já são 5 horas!', { pitch: 0.85, rate: 0.98 });
       document.getElementById('b0').classList.remove('show');
       document.getElementById('clock0').classList.replace('shaking', 'calm');
       await wait(400);
       document.querySelector('#c0 .eye.l').classList.remove('closed');
       await wait(600);
-      await say('b-clovis-0', 'Clóvis', 'Só mais 5 minutos...', { pitch: 1.25, rate: 0.9 });
+      await say('b-clovis-0', 'Cláudio', 'Só mais 5 minutos...', { pitch: 1.25, rate: 0.9 });
       break;
     }
     case 1: {
       await wait(500);
-      await say('b1', 'Narrador', 'Clóvis! Se você dormir mais 5 minutos, você vai atrasar. Você tem DOIS ônibus e um metrô pra pegar!', { pitch: 0.85, rate: 1.02 });
+      await say('b1', 'Narrador', 'Cláudio! Se você dormir mais 5 minutos, você vai atrasar. Você tem DOIS ônibus e um metrô pra pegar!', { pitch: 0.85, rate: 1.02 });
       const cl = document.getElementById('c1');
       cl.querySelector('.eye.l').classList.remove('closed');
       cl.querySelector('.eye.r').classList.remove('closed');
@@ -554,7 +554,7 @@ async function playScene(i) {
     }
     case 2: {
       await wait(400);
-      const p = say('b2', 'Narrador', 'E então Clóvis levanta. Arrastando os pés, como sempre.', { pitch: 0.85, rate: 0.98 });
+      const p = say('b2', 'Narrador', 'E então Cláudio levanta. Arrastando os pés, como sempre.', { pitch: 0.85, rate: 0.98 });
       moveChar('c2', '58%', 'walk');
       await p;
       document.getElementById('c2').classList.remove('walk');
@@ -563,18 +563,18 @@ async function playScene(i) {
     case 3: {
       moveChar('c3', '30%', null);
       await wait(700);
-      await say('b3', 'Narrador', 'Clóvis tenta tomar seu café... mas o relógio não perdoa: dois ônibus e um metrô esperam por ele.', { pitch: 0.85, rate: 1 });
+      await say('b3', 'Narrador', 'Cláudio tenta tomar seu café... mas o relógio não perdoa: dois ônibus e um metrô esperam por ele.', { pitch: 0.85, rate: 1 });
       break;
     }
     case 4: {
       moveChar('c4', '46%', 'walk');
       await wait(900);
-      await say('b4', 'Narrador', 'E Clóvis NÃO escova os dentes. Mais uma vez. Tudo pra pegar o primeiro ônibus.', { pitch: 0.85, rate: 1 });
+      await say('b4', 'Narrador', 'E Cláudio NÃO escova os dentes. Mais uma vez. Tudo pra pegar o primeiro ônibus.', { pitch: 0.85, rate: 1 });
       break;
     }
     case 5: {
       await wait(400);
-      const p = say('b5', 'Narrador', 'Lá vem o primeiro ônibus. Clóvis mal consegue respirar.', { pitch: 0.85, rate: 1 });
+      const p = say('b5', 'Narrador', 'Lá vem o primeiro ônibus. Cláudio mal consegue respirar.', { pitch: 0.85, rate: 1 });
       await wait(2400);
       moveChar('c5', '52%', 'walk');
       await p;
@@ -587,7 +587,7 @@ async function playScene(i) {
     }
     case 6: {
       await wait(400);
-      const p = say('b6', 'Narrador', 'Agora o segundo ônibus. O dia mal começou e Clóvis já correu duas corridas.', { pitch: 0.85, rate: 1 });
+      const p = say('b6', 'Narrador', 'Agora o segundo ônibus. O dia mal começou e Cláudio já correu duas corridas.', { pitch: 0.85, rate: 1 });
       await wait(2400);
       moveChar('c6', '54%', 'walk');
       await p;
@@ -614,19 +614,19 @@ async function playScene(i) {
     case 8: {
       moveChar('c8', '22%', 'walk');
       await wait(600);
-      await say('b8', 'Narrador', 'Eis que Clóvis chega no trabalho... e ninguém dá um sorriso pra ele.', { pitch: 0.85, rate: 0.95 });
+      await say('b8', 'Narrador', 'Eis que Cláudio chega no trabalho... e ninguém dá um sorriso pra ele.', { pitch: 0.85, rate: 0.95 });
       break;
     }
     case 9: {
       moveChar('c9', '74%', 'walk');
       await wait(600);
-      await say('b9', 'Narrador', 'O dia acaba. E Clóvis vai fazer a mesma rotina de amanhã de manhã.', { pitch: 0.85, rate: 0.95 });
+      await say('b9', 'Narrador', 'O dia acaba. E Cláudio vai fazer a mesma rotina de amanhã de manhã.', { pitch: 0.85, rate: 0.95 });
       break;
     }
     case 10: {
       const cells = [...document.querySelectorAll('.day-cell')];
       cells.forEach(c => c.classList.remove('done', 'active-day'));
-      const p = say('b9', 'Narrador', 'Clóvis faz isso todo dia.', { pitch: 0.85, rate: 0.95 });
+      const p = say('b9', 'Narrador', 'Cláudio faz isso todo dia.', { pitch: 0.85, rate: 0.95 });
       for (let k = 0; k < cells.length; k++) {
         cells.forEach((c, j) => c.classList.toggle('active-day', j === k));
         cells[k].classList.add('done');

@@ -35,8 +35,9 @@ DAY_TOP,   DAY_BOT   = C('6db9dd'), C('ffe8c2')
 DUSK_TOP,  DUSK_BOT  = C('2e2749'), C('e79a5e')
 IN_TOP,    IN_BOT    = C('37344a'), C('4e4766')
 SKIN, SKIN_D         = C('f6cba4'), C('e5ac82')
-HAIR                 = C('4a342a')
-SHIRT, SHIRT_D       = C('2fa393'), C('23857a')
+HAIR                 = C('33231b')
+BEARD                = C('3a2a20')
+SHIRT, SHIRT_D       = C('3a7bd5'), C('2d5fa8')
 PANTS, PANTS_D       = C('3d5166'), C('314254')
 SHOE                 = C('26262b')
 GROUND               = C('3a4a5f')
@@ -123,7 +124,8 @@ def sky_scene(kind, t=0.0):
     return im, d
 
 # ---------- personagem ----------
-def draw_char(d, x, y, t, pose='stand', eyes='open', mouth='flat', walking=False, phase=0.0):
+def draw_char(d, x, y, t, pose='stand', eyes='open', mouth='flat', walking=False, phase=0.0,
+              hand_face=False, hold_bar=False, backpack=False, badge=False, back=False):
     """x = centro dos pés, y = linha do chão."""
     if pose == 'lie':
         return
@@ -148,6 +150,13 @@ def draw_char(d, x, y, t, pose='stand', eyes='open', mouth='flat', walking=False
         rr(d, (fx - 12, fy - 10, fx + 10, fy), 4, fill=SHOE)
     # torso
     rr(d, (x - 25, sh_y - 6, x + 25, hip_y + 8), 12, fill=SHIRT)
+    if backpack:
+        rr(d, (x - 21, sh_y - 2, x + 21, hip_y + 4), 10, outline=SHIRT_D, width=3 * S)
+        line(d, [(x - 14, sh_y - 2), (x - 14, hip_y - 6)], 4, SHIRT_D)
+        line(d, [(x + 14, sh_y - 2), (x + 14, hip_y - 6)], 4, SHIRT_D)
+    if badge:
+        rr(d, (x + 8, sh_y + 6, x + 20, sh_y + 20), 2, fill=WHITE)
+        d.rectangle([(x + 12) * S, (sh_y + 8) * S, (x + 16) * S, (sh_y + 11) * S], fill=C('3a7bd5'))
     # braços
     for side in (-1, 1):
         if walking:
@@ -157,9 +166,23 @@ def draw_char(d, x, y, t, pose='stand', eyes='open', mouth='flat', walking=False
             hx, hy = x + side * 28, hip_y - 6
         else:
             hx, hy = x + side * 28, hip_y - 12
+        if hand_face and side > 0:
+            line(d, [(x + side * 22, sh_y + 4), (x + 30, sh_y + 22)], 9, SHIRT_D)
+            line(d, [(x + 30, sh_y + 22), (x + 6, head_cy + 16)], 9, SHIRT_D)
+            ell(d, (x + 2, head_cy + 12, x + 12, head_cy + 22), fill=SKIN)
+            continue
+        if hold_bar and side > 0:
+            line(d, [(x + side * 22, sh_y + 4), (x + 16, head_cy + 2)], 9, SHIRT_D)
+            ell(d, (x + 11, head_cy - 3, x + 21, head_cy + 7), fill=SKIN)
+            continue
         line(d, [(x + side * 22, sh_y + 4), (hx, hy)], 9, SHIRT_D)
         ell(d, (hx - 6, hy - 6, hx + 6, hy + 6), fill=SKIN)
     # cabeça
+    if back:
+        ell(d, (x - 21, head_cy - 23, x + 21, head_cy + 21), fill=SKIN)
+        ell(d, (x - 20, head_cy - 22, x + 20, head_cy + 20), fill=HAIR)
+        rr(d, (x - 25, sh_y - 6, x + 25, hip_y + 8), 12, fill=SHIRT)
+        return
     ell(d, (x - 21, head_cy - 23, x + 21, head_cy + 21), fill=SKIN)
     rr(d, (x - 22, head_cy - 26, x + 22, head_cy - 8), 12, fill=HAIR)
     ell(d, (x - 26, head_cy - 3, x - 19, head_cy + 8), fill=SKIN_D)
@@ -173,6 +196,9 @@ def draw_char(d, x, y, t, pose='stand', eyes='open', mouth='flat', walking=False
             ell(d, (x + side * 9 - 3.5, head_cy - 3.5, x + side * 9 + 3.5, head_cy + 3.5), fill=C('26211d'))
         d.rectangle([(x + side * 9 - 4) * S, (head_cy - 8) * S, (x + side * 9 + 4) * S, (head_cy - 6) * S], fill=HAIR)
     rr(d, (x - 2, head_cy + 1, x + 2, head_cy + 7), 2, fill=SKIN_D)
+    ell(d, (x - 16, head_cy + 8, x + 16, head_cy + 22), fill=BEARD)
+    rr(d, (x - 20, head_cy + 2, x - 15, head_cy + 14), 4, fill=BEARD)
+    rr(d, (x + 15, head_cy + 2, x + 20, head_cy + 14), 4, fill=BEARD)
     if mouth == 'sad':
         d.arc([(x - 7) * S, (head_cy + 8) * S, (x + 7) * S, (head_cy + 18) * S], 180, 360, fill=C('a4552f'), width=int(2.5 * S))
     elif mouth == 'flat':

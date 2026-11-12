@@ -182,7 +182,7 @@ def bathroom_v2(t, char_x=None):
         add_char(im, d, char_x, H - 96, t, pose='stand', eyes='open', mouth='flat', walking=True, phase=t * 11)
     return im
 
-def bus_street_v2(t, kind, char_x=None, walking=False, mouth='flat', bus_x=None, bus_color=None):
+def bus_street_v2(t, kind, char_x=None, walking=False, mouth='flat', bus_x=None, bus_color=None, backpack=False):
     if kind == 'dawn':
         im = gradient((C('26365f'), C('e8985e')))
         cloud(d := ImageDraw.Draw(im, 'RGBA'), 300, 120, 34, 70)
@@ -210,7 +210,7 @@ def bus_street_v2(t, kind, char_x=None, walking=False, mouth='flat', bus_x=None,
         draw_bus(d, bus_x, gy + 66, c1, c2)
     if char_x is not None:
         add_char(im, d, char_x, gy + 62, t, pose='stand', eyes='open', mouth=mouth,
-                 walking=walking, phase=t * 11)
+                 walking=walking, phase=t * 11, backpack=backpack)
     return im
 
 def metro_v2(t, char_x=None, bus_x=None):
@@ -266,7 +266,7 @@ def office_v2(t, char_x=None):
                  walking=t < 2.6, phase=t * 11)
     return im
 
-def dusk_v2(t, char_x=None):
+def dusk_v2(t, char_x=None, backpack=False):
     im = gradient((C('2e2749'), C('e79a5e')))
     d = ImageDraw.Draw(im, 'RGBA')
     cloud(d, 320, 140, 40, 90)
@@ -282,7 +282,7 @@ def dusk_v2(t, char_x=None):
         lamp_glow(d, lx + 1, H - 244, 52, col=(255, 233, 168))
     if char_x is not None:
         add_char(im, d, char_x, gy + 62, t, pose='stand', eyes='open', mouth='sad',
-                 walking=True, phase=t * 11)
+                 walking=True, phase=t * 11, backpack=backpack)
     return im
 
 def scene_at_v2(idx, t):
@@ -308,4 +308,106 @@ def scene_at_v2(idx, t):
     if idx == 10:
         cx = 120 + min(1, max(0, (t - 0.6) / 3.6)) * 780
         return dusk_v2(t, char_x=cx)
+    return r.scene_week(t)
+
+# ---------- cenas v3 (ficha do Cláudio) ----------
+def bus_interior(t, variant=0):
+    im = gradient((C('c9c4b8'), C('a8a294')))
+    d = ImageDraw.Draw(im, 'RGBA')
+    d.rectangle([0, (H - 130) * S, W * S, H * S], fill=C('6a655a'))
+    d.rectangle([0, (H - 130) * S, W * S, (H - 118) * S], fill=C('7a7468'))
+    wy0, wy1 = 90, 240
+    d.rectangle([0, wy0 * S, W * S, wy1 * S], fill=C('3c4454'))
+    shift = int(t * 130) % 260
+    for k in range(-1, 6):
+        bx0 = k * 260 - shift
+        rr(d, (bx0 + 14, wy0 + 14, bx0 + 246, wy1 - 14), 8, fill=C('9cc9e8'))
+        rr(d, (bx0 + 30, wy0 + 40, bx0 + 120, wy1 - 40), 6, fill=C('c8e4f6'))
+        base = H - 130
+        hh = [180, 130, 210, 150]
+        for j, h in enumerate(hh):
+            rr(d, (bx0 + 30 + j * 55, base - h, bx0 + 75 + j * 55, base), 2, fill=C('33415c'))
+    for wx0 in range(0, W + 130, 130):
+        d.rectangle([wx0 * S, wy0 * S, (wx0 + 8) * S, wy1 * S], fill=C('5a5f6a'))
+    rr(d, (W / 2 - 170, 20, W / 2 + 170, 62), 6, fill=C('f5c95d'))
+    txt(d, W / 2, 27, 'FOCO, FORÇA E FÉ', font(17, bold=True), C('4a3b12'), anchor='ma')
+    for sx0 in range(40, W, 240):
+        rr(d, (sx0, H - 260, sx0 + 150, H - 140), 10, fill=C('4a6b8a'))
+        rr(d, (sx0 + 12, H - 248, sx0 + 138, H - 190), 8, fill=C('5a7b9a'))
+    ell(d, (445, H - 96, 505, H - 84), fill=(0, 0, 0, 60))
+    if variant == 0:
+        draw_char(d, 475, H - 150, t, pose='sit', eyes='closed', mouth='flat', hand_face=True, backpack=True)
+    else:
+        d.rectangle([487 * S, 70 * S, 497 * S, (H - 140) * S], fill=C('8a8f99'))
+        ell(d, (481, 62, 503, 80), fill=C('c9c4b8'))
+        draw_char(d, 475, H - 140, t, pose='stand', eyes='open', mouth='sad', hold_bar=True, backpack=True)
+    return im
+
+def tv_scene(t):
+    im = gradient((C('3a3450'), C('54496e')))
+    d = ImageDraw.Draw(im, 'RGBA')
+    d.rectangle([0, (H - 110) * S, W * S, H * S], fill=C('5a4a42'))
+    window_night(d, 80, 60, 190, 140, t)
+    flicker = 0.85 + 0.15 * math.sin(t * 9)
+    rr(d, (760, 120, 1140, 340), 10, fill=C('14141c'), outline=C('2a2a36'), width=6 * S)
+    d.rectangle([776 * S, 136 * S, 1124 * S, 324 * S], fill=C('0e2a4a'))
+    for k in range(3):
+        a = int(26 * flicker)
+        ell(d, (760 - k * 40, 120 - k * 40, 1140 + k * 40, 340 + k * 40), fill=(120, 180, 255, a))
+    txt(d, 950, 190, 'FIM DA ESCALA', font(24, bold=True), C('ff6b6b'), anchor='ma')
+    txt(d, 950, 228, '6x1 ?', font(30, bold=True), WHITE, anchor='ma')
+    rr(d, (830, 340, 1070, 360), 4, fill=C('3a3450'))
+    rr(d, (300, H - 210, 700, H - 130), 14, fill=C('6a5a8a'))
+    rr(d, (300, H - 240, 700, H - 200), 12, fill=C('7a6a9a'))
+    rr(d, (285, H - 260, 320, H - 130), 8, fill=C('5a4a7a'))
+    rr(d, (680, H - 260, 715, H - 130), 8, fill=C('5a4a7a'))
+    draw_char(d, 500, H - 150, t, pose='sit', back=True)
+    ell(d, (500, H - 152, 620, H - 140), fill=(0, 0, 0, 50))
+    return im
+
+def office_v3(t, char_x=None):
+    im = office_v2(t, char_x=None)
+    d = ImageDraw.Draw(im, 'RGBA')
+    if char_x is None or t >= 2.8:
+        rr(d, (660, H - 148, 900, H - 134), 3, fill=C('9c7a52'))
+        for px in (680, 880):
+            d.rectangle([px * S, (H - 134) * S, (px + 10) * S, (H - 74) * S], fill=C('66502f'))
+        rr(d, (726, H - 186, 774, H - 148), 4, fill=C('22283a'))
+        rr(d, (732, H - 180, 768, H - 154), 3, fill=C('7fd4ff'))
+        ell(d, (778, H - 100, 838, H - 88), fill=(0, 0, 0, 40))
+        draw_char(d, 780, H - 148, t, pose='sit', eyes='open', mouth='flat', badge=True)
+    return im
+
+SCENES_V3_COUNT = 15
+
+def scene_at_v3(idx, t):
+    if idx in (0, 1, 2):
+        return quarto_v2(t, sitting=(idx >= 1), warning=(idx == 2))
+    if idx == 3:
+        cx = 200 + min(1, max(0, (t - 0.7) / 3.6)) * 700
+        return bus_street_v2(t, 'dawn', char_x=cx, walking=(t < 4.3), backpack=True)
+    if idx == 4:  return kitchen_v2(t)
+    if idx == 5:  return bathroom_v2(t, char_x=180 + min(1, max(0, (t - 0.6) / 2.4)) * 380)
+    if idx == 6:
+        bx = -300 + (min(t, 2.6) / 2.6) * 480 if t < 2.6 else (180 if t < 5.0 else 180 + ((t - 5.0) / 2.0) * 1300)
+        return bus_street_v2(t, 'dawn', char_x=None if t >= 5.0 else 380 + min(1, max(0, (t - 2.6) / 1.6)) * 90,
+                             walking=(2.6 <= t < 4.2), bus_x=bx, bus_color=(C('f28268'), C('dd5f42')))
+    if idx == 7:  return bus_interior(t, variant=0)
+    if idx == 8:
+        bx = -300 + (min(t, 2.6) / 2.6) * 480 if t < 2.6 else (180 if t < 5.0 else 180 + ((t - 5.0) / 2.0) * 1300)
+        return bus_street_v2(t, 'day', char_x=None if t >= 5.0 else 400 + min(1, max(0, (t - 2.6) / 1.6)) * 90,
+                             walking=(2.6 <= t < 4.2), bus_x=bx, bus_color=(C('9fd4ee'), C('6fb3d6')))
+    if idx == 9:  return bus_interior(t, variant=1)
+    if idx == 10:
+        if t < 2.6:   bx = -300 + (t / 2.6) * 480
+        elif t < 5.0: bx = 180
+        else:         bx = 180 + ((t - 5.0) / 2.0) * 1300
+        return metro_v2(t, char_x=None if t >= 5.0 else 420 + min(1, max(0, (t - 2.6) / 1.6)) * 90, bus_x=bx)
+    if idx == 11:
+        cx = 60 + min(1, max(0, (t - 0.6) / 2.2)) * 640
+        return office_v3(t, char_x=cx if t < 2.8 else None)
+    if idx == 12:
+        cx = 120 + min(1, max(0, (t - 0.6) / 3.6)) * 780
+        return dusk_v2(t, char_x=cx, backpack=True)
+    if idx == 13: return tv_scene(t)
     return r.scene_week(t)
