@@ -7,264 +7,260 @@
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
-    background: #101318;
+    background: #0d1017;
     font-family: 'Trebuchet MS', 'Segoe UI', sans-serif;
     display: flex; flex-direction: column; align-items: center;
-    min-height: 100vh; padding: 16px;
+    min-height: 100vh; padding: 14px;
   }
-  h1 { color: #ffd166; font-size: 22px; margin-bottom: 10px; letter-spacing: 1px; }
+  h1 { color: #ffd166; font-size: 18px; margin-bottom: 8px; letter-spacing: 1px; }
 
   #stage-wrap { position: relative; width: min(920px, 96vw); }
   #stage {
     position: relative; width: 100%; aspect-ratio: 16 / 9;
-    background: #22304a; border-radius: 14px; overflow: hidden;
-    box-shadow: 0 10px 40px rgba(0,0,0,.6);
+    background: #22304a; border-radius: 12px; overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0,0,0,.65);
+  }
+  .vignette {
+    position: absolute; inset: 0; pointer-events: none; z-index: 20;
+    background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,.38) 100%);
   }
   .scene {
     position: absolute; inset: 0; opacity: 0; pointer-events: none;
-    transition: opacity .6s ease;
+    transition: opacity .7s ease;
   }
   .scene.active { opacity: 1; }
 
-  /* ---------- Céu / fundos ---------- */
-  .sky-night  { background: linear-gradient(#0b1026 0%, #1b2440 60%, #2c3a5c 100%); }
-  .sky-dawn   { background: linear-gradient(#2b3a67 0%, #6b5b95 45%, #e8985e 100%); }
-  .sky-day    { background: linear-gradient(#7ec8e3 0%, #bde0fe 70%, #ffe8c2 100%); }
-  .sky-dusk   { background: linear-gradient(#3a2f5b 0%, #b56576 55%, #f4a261 100%); }
-  .indoor     { background: linear-gradient(#3d3a50 0%, #57506e 100%); }
+  /* ---------- Fundos ---------- */
+  .sky-night { background: linear-gradient(#070b1c 0%, #141d38 55%, #26334f 100%); }
+  .sky-dawn  { background: linear-gradient(#26365f 0%, #6b5b95 45%, #e8985e 100%); }
+  .sky-day   { background: linear-gradient(#6db9dd 0%, #aadcf7 60%, #ffe8c2 100%); }
+  .sky-dusk  { background: linear-gradient(#2e2749 0%, #a15c6e 55%, #e79a5e 100%); }
+  .indoor    { background: linear-gradient(#37344a 0%, #4e4766 100%); }
 
   .stars { position: absolute; inset: 0; }
-  .star { position: absolute; width: 3px; height: 3px; background: #fff; border-radius: 50%; animation: twinkle 2s infinite ease-in-out; }
-  @keyframes twinkle { 0%,100% { opacity: .2 } 50% { opacity: 1 } }
+  .star { position: absolute; width: 2px; height: 2px; background: #fff; border-radius: 50%; animation: twinkle 2.4s infinite ease-in-out; }
+  @keyframes twinkle { 0%,100% { opacity: .15 } 50% { opacity: .9 } }
 
-  .sun, .moon {
-    position: absolute; top: 12%; left: 70%; width: 70px; height: 70px; border-radius: 50%;
-  }
-  .moon { background: #f4f1de; box-shadow: 0 0 40px #f4f1de88; }
-  .sun  { background: #ffd166; box-shadow: 0 0 60px #ffd166aa; animation: rise 6s ease forwards; }
-  @keyframes rise { from { transform: translateY(120px); } to { transform: translateY(0); } }
+  .moon { position: absolute; top: 10%; left: 72%; width: 54px; height: 54px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #fdfbf4, #d9d4c0);
+    box-shadow: 0 0 34px #f4f1de55; }
+  .moon::after { content:''; position: absolute; top: 12px; left: 14px; width: 10px; height: 10px; background: #c9c4ae; border-radius: 50%; opacity:.7; }
+  .sun { position: absolute; width: 58px; height: 58px; border-radius: 50%;
+    background: radial-gradient(circle at 40% 40%, #ffe9a8, #ffb84d);
+    box-shadow: 0 0 55px #ffcf6eaa; }
 
-  .ground {
-    position: absolute; bottom: 0; left: 0; right: 0; height: 22%;
-    background: #3a4a5f; border-top: 4px solid #2b3850;
-  }
-  .road {
-    position: absolute; bottom: 6%; left: 0; right: 0; height: 16%;
-    background: #2c3444; border-top: 3px dashed #f4f1de55;
-  }
+  .ground { position: absolute; bottom: 0; left: 0; right: 0; height: 20%;
+    background: linear-gradient(#3a4a5f, #2e3b4d); }
+  .road { position: absolute; bottom: 5%; left: 0; right: 0; height: 15%;
+    background: #272e3d; }
+  .road::before { content: ''; position: absolute; top: 48%; left: 0; right: 0; height: 3px;
+    background: repeating-linear-gradient(90deg, #f4f1de66 0 34px, transparent 34px 70px); }
 
-  /* ---------- Cama / quarto ---------- */
-  .bed {
-    position: absolute; bottom: 12%; left: 12%; width: 300px; height: 120px;
-    background: #7f5af0; border-radius: 16px 16px 6px 6px;
-  }
-  .bed::before {
-    content: ''; position: absolute; top: -34px; left: 10px; width: 90px; height: 60px;
-    background: #c1b8f7; border-radius: 10px;
-  }
-  .blanket { position: absolute; bottom: 0; left: 60px; right: 0; top: 30px; background: #ef476f; border-radius: 12px; }
-  .pillow  { position: absolute; top: 6px; left: 12px; width: 90px; height: 34px; background: #fdfdfd; border-radius: 10px; }
+  .city { position: absolute; bottom: 20%; left: 0; right: 0; height: 36%;
+    display: flex; align-items: flex-end; justify-content: space-around; padding: 0 3%; }
+  .building { width: 11%; background: linear-gradient(#33415c, #26324a); border-radius: 4px 4px 0 0; position: relative; }
+  .building::before { content: ''; position: absolute; inset: 10% 16%;
+    background: repeating-linear-gradient(#ffd1662e 0 9px, transparent 9px 20px); }
 
-  .clock {
-    position: absolute; top: 14%; right: 12%; width: 130px; height: 90px;
-    background: #1d1d2b; border: 5px solid #ef476f; border-radius: 12px;
-    display: flex; align-items: center; justify-content: center;
-    font-family: 'Courier New', monospace; font-size: 38px; font-weight: bold; color: #ff5d5d;
-    box-shadow: 0 0 24px #ef476f66; animation: clockPulse 1s infinite;
-  }
-  @keyframes clockPulse { 0%,100% { box-shadow: 0 0 18px #ef476f66 } 50% { box-shadow: 0 0 44px #ef476fcc } }
-  .clock.zzz { animation: none; color: #9aa; border-color: #444; box-shadow: none; }
+  /* ---------- Quarto ---------- */
+  .bed { position: absolute; bottom: 12%; left: 10%; width: 320px; height: 110px;
+    background: linear-gradient(#8a68f2, #6d4fd6); border-radius: 14px 14px 6px 6px;
+    box-shadow: 0 8px 18px rgba(0,0,0,.4); }
+  .bed .headboard { position: absolute; top: -46px; left: 0; width: 26px; height: 70px; background: #5b3fb8; border-radius: 10px 10px 0 0; }
+  .bed .mattress { position: absolute; top: 4px; left: 20px; right: 6px; height: 26px; background: #ded9f5; border-radius: 10px; }
+  .bed .blanket { position: absolute; top: 26px; left: 70px; right: 0; bottom: 0;
+    background: linear-gradient(#f0607f, #d94b6b); border-radius: 12px 12px 8px 8px; }
+  .bed .blanket::before { content:''; position: absolute; top: 10px; left: 0; right: 0; height: 6px; background: #ffffff30; }
+  .bed .pillow { position: absolute; top: 0; left: 24px; width: 92px; height: 30px;
+    background: linear-gradient(#ffffff, #e8e6ef); border-radius: 12px; }
 
-  .zzz {
-    position: absolute; font-weight: bold; color: #cfd8ff; font-size: 26px;
-    animation: floatUp 2.4s infinite ease-out;
-  }
-  @keyframes floatUp { from { opacity: 0; transform: translateY(0) } 30% { opacity: 1 } to { opacity: 0; transform: translateY(-70px) } }
+  .clock { position: absolute; top: 12%; right: 10%; padding: 8px 16px;
+    background: #16161f; border: 3px solid #ef476f; border-radius: 8px;
+    font-family: 'Courier New', monospace; font-size: 30px; font-weight: bold; color: #ff5d5d;
+    box-shadow: 0 0 20px #ef476f55; }
+  .clock.shaking { animation: shake .5s infinite; }
+  @keyframes shake { 0%,100% { transform: rotate(0) } 25% { transform: rotate(-3deg) } 75% { transform: rotate(3deg) } }
+  .clock.calm { animation: none; box-shadow: none; border-color: #3c3c4e; color: #8b93a8; }
 
-  /* ---------- Personagem Clóvis ---------- */
-  .clovis { position: absolute; width: 90px; height: 170px; transition: all .8s ease; }
-  .clovis .head {
-    position: absolute; top: 0; left: 20px; width: 52px; height: 52px;
-    background: #f2c29b; border-radius: 50%; position: relative;
-  }
-  .clovis .hair { position: absolute; top: -6px; left: 2px; right: 2px; height: 20px; background: #3c2f2f; border-radius: 26px 26px 4px 4px; }
-  .clovis .eye {
-    position: absolute; top: 22px; width: 8px; height: 8px; background: #222; border-radius: 50%;
-  }
-  .clovis .eye.l { left: 12px; } .clovis .eye.r { right: 12px; }
-  .clovis .eye.closed { height: 2px; top: 26px; border-radius: 2px; }
-  .clovis .mouth {
-    position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
-    width: 16px; height: 8px; border-bottom: 3px solid #a4552f; border-radius: 0 0 12px 12px;
-  }
-  .clovis .mouth.flat { height: 2px; border: none; background: #a4552f; border-radius: 2px; }
-  .clovis .mouth.sad { border-bottom: none; border-top: 3px solid #a4552f; border-radius: 12px 12px 0 0; }
-  .clovis .body {
-    position: absolute; top: 52px; left: 12px; width: 66px; height: 66px;
-    background: #2a9d8f; border-radius: 16px;
-  }
-  .clovis .arm {
-    position: absolute; top: 58px; width: 14px; height: 52px; background: #2a9d8f; border-radius: 8px;
-  }
-  .clovis .arm.l { left: 0; } .clovis .arm.r { right: 0; }
-  .clovis .leg {
-    position: absolute; top: 118px; width: 18px; height: 52px; background: #35495e; border-radius: 8px;
-  }
-  .clovis .leg.l { left: 18px; } .clovis .leg.r { right: 18px; }
-  .clovis .shoe { position: absolute; bottom: -4px; width: 24px; height: 12px; background: #222; border-radius: 8px 4px 4px 4px; }
+  .zzz { position: absolute; font-weight: bold; color: #cfd8ff; font-size: 20px;
+    text-shadow: 0 2px 6px #0008; animation: floatUp 2.6s infinite ease-out; }
+  @keyframes floatUp { from { opacity: 0; transform: translateY(6px) } 30% { opacity: 1 } to { opacity: 0; transform: translateY(-56px) } }
 
-  .clovis.lying { transform: rotate(90deg) translate(30px, -30px); }
-  .clovis.sitting { transform: translateY(30px) scaleY(.92); }
-  .clovis.sitting .leg { height: 30px; top: 128px; }
-  .clovis.walking { animation: walk .6s infinite ease-in-out; }
-  @keyframes walk { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-8px) } }
-  .clovis.walking .arm.l { animation: swing .6s infinite ease-in-out; }
-  .clovis.walking .arm.r { animation: swing .6s infinite ease-in-out reverse; }
-  @keyframes swing { 0%,100% { transform: rotate(12deg) } 50% { transform: rotate(-12deg) } }
-  .clovis.tired .eye { background: #222; }
+  /* ---------- Personagem ---------- */
+  .char { position: absolute; width: 76px; height: 178px; transition: left 2.2s ease, bottom .8s ease, opacity .8s ease, transform .9s ease; z-index: 5; }
+  .char .shadow { position: absolute; bottom: -6px; left: 6px; width: 64px; height: 12px;
+    background: radial-gradient(ellipse, rgba(0,0,0,.45), transparent 70%); }
+  .char .head { position: absolute; top: 0; left: 17px; width: 42px; height: 46px;
+    background: linear-gradient(135deg, #f6cba4, #e5ac82); border-radius: 46% 46% 42% 42%; }
+  .char .hair { position: absolute; top: -5px; left: -1px; right: -1px; height: 18px;
+    background: linear-gradient(#4a342a, #33231b); border-radius: 24px 24px 6px 8px; }
+  .char .ear { position: absolute; top: 22px; width: 7px; height: 10px; background: #e5ac82; border-radius: 50%; }
+  .char .ear.l { left: -5px; } .char .ear.r { right: -5px; }
+  .char .brow { position: absolute; top: 17px; width: 9px; height: 3px; background: #4a342a; border-radius: 3px; }
+  .char .brow.l { left: 9px; } .char .brow.r { right: 9px; }
+  .char .eye { position: absolute; top: 23px; width: 7px; height: 7px; background: #26211d; border-radius: 50%; }
+  .char .eye.l { left: 10px; } .char .eye.r { right: 10px; }
+  .char .eye.closed { height: 2px; top: 27px; border-radius: 2px; }
+  .char .nose { position: absolute; top: 30px; left: 50%; transform: translateX(-50%); width: 5px; height: 6px; background: #dda87e; border-radius: 40%; }
+  .char .mouth { position: absolute; bottom: 7px; left: 50%; transform: translateX(-50%);
+    width: 13px; height: 6px; border-bottom: 2.5px solid #a4552f; border-radius: 0 0 10px 10px; }
+  .char .mouth.flat { height: 2px; border: none; background: #a4552f; border-radius: 2px; }
+  .char .mouth.sad { border-bottom: none; border-top: 2.5px solid #a4552f; border-radius: 10px 10px 0 0; }
+  .char .neck { position: absolute; top: 44px; left: 33px; width: 10px; height: 8px; background: #e0a67c; }
+  .char .torso { position: absolute; top: 50px; left: 12px; width: 52px; height: 58px;
+    background: linear-gradient(135deg, #2fa393, #23857a); border-radius: 14px 14px 10px 10px; }
+  .char .arm { position: absolute; top: 54px; width: 11px; height: 46px;
+    background: linear-gradient(#2fa393, #23857a); border-radius: 6px; transition: transform .5s ease; }
+  .char .arm.l { left: 1px; } .char .arm.r { right: 1px; }
+  .char .hand { position: absolute; bottom: -7px; left: -1px; width: 13px; height: 13px; background: #efb98d; border-radius: 50%; }
+  .char .leg { position: absolute; top: 106px; width: 15px; height: 56px;
+    background: linear-gradient(#3d5166, #314254); border-radius: 7px; transition: transform .4s ease; transform-origin: top center; }
+  .char .leg.l { left: 15px; } .char .leg.r { right: 15px; }
+  .char .shoe { position: absolute; bottom: -3px; left: -4px; width: 23px; height: 11px;
+    background: linear-gradient(#3a3a3a, #1f1f1f); border-radius: 8px 5px 3px 3px; }
 
-  /* ---------- Balões de fala ---------- */
+  .char.lie { transform: rotate(90deg) translate(40px, -20px); }
+  .char.lie .leg { transform: rotate(6deg); }
+  .char.sit { transform: translateY(34px); }
+  .char.sit .leg { height: 34px; top: 122px; transform: rotate(-14deg); transform-origin: top center; }
+  .char.walk { animation: bounce .55s infinite ease-in-out; }
+  @keyframes bounce { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-5px) } }
+  .char.walk .arm.l { animation: swingA .55s infinite ease-in-out; }
+  .char.walk .arm.r { animation: swingA .55s infinite ease-in-out reverse; }
+  .char.walk .leg.l { animation: swingL .55s infinite ease-in-out; }
+  .char.walk .leg.r { animation: swingL .55s infinite ease-in-out reverse; }
+  @keyframes swingA { 0%,100% { transform: rotate(14deg) } 50% { transform: rotate(-14deg) } }
+  @keyframes swingL { 0%,100% { transform: rotate(16deg) } 50% { transform: rotate(-16deg) } }
+
+  /* ---------- Balões (menores) ---------- */
   .bubble {
-    position: absolute; max-width: 55%; padding: 14px 18px;
-    background: #fff; color: #222; border-radius: 14px; font-size: 17px; line-height: 1.35;
-    opacity: 0; transform: translateY(10px) scale(.95); transition: all .35s ease;
-    box-shadow: 0 6px 20px rgba(0,0,0,.35); z-index: 10;
+    position: absolute; max-width: 42%; padding: 8px 12px;
+    background: #fff; color: #26221e; border-radius: 10px; font-size: 13px; line-height: 1.3;
+    opacity: 0; transform: translateY(8px) scale(.96); transition: all .35s ease;
+    box-shadow: 0 4px 14px rgba(0,0,0,.4); z-index: 15;
   }
   .bubble.show { opacity: 1; transform: translateY(0) scale(1); }
-  .bubble::after {
-    content: ''; position: absolute; bottom: -14px; left: 40px;
-    border: 8px solid transparent; border-top-color: #fff;
-  }
+  .bubble::after { content: ''; position: absolute; bottom: -11px; left: 30px;
+    border: 6px solid transparent; border-top-color: #fff; }
   .bubble.narrator {
-    left: 50%; bottom: 4%; transform: translateX(-50%) translateY(10px);
-    background: #ffd166; font-style: italic; text-align: center; max-width: 78%;
+    left: 50%; bottom: 2.5%; transform: translateX(-50%) translateY(8px);
+    background: #ffe9b3; font-style: italic; text-align: center; max-width: 62%;
+    padding: 7px 14px; font-size: 13px;
   }
   .bubble.narrator.show { transform: translateX(-50%) translateY(0); }
   .bubble.narrator::after { display: none; }
-  .bubble.right { right: 6%; } .bubble.right::after { left: auto; right: 40px; }
-
-  .speaker { display: block; font-size: 12px; font-weight: bold; color: #888; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 1px; }
+  .bubble.right::after { left: auto; right: 30px; }
+  .speaker { display: block; font-size: 9px; font-weight: bold; color: #9a8f80;
+    text-transform: uppercase; margin-bottom: 2px; letter-spacing: 1.2px; }
   .narrator .speaker { color: #b07d2b; }
 
-  /* ---------- Objetos das cenas ---------- */
-  .table {
-    position: absolute; bottom: 12%; left: 30%; width: 260px; height: 16px; background: #8d6e4a; border-radius: 4px;
-  }
-  .table::before, .table::after {
-    content: ''; position: absolute; top: 16px; width: 12px; height: 70px; background: #6d5236;
-  }
-  .table::before { left: 20px; } .table::after { right: 20px; }
-  .mug {
-    position: absolute; bottom: calc(12% + 16px); left: 38%; width: 34px; height: 30px;
-    background: #ef476f; border-radius: 4px 4px 10px 10px;
-  }
-  .mug::after { content: ''; position: absolute; right: -12px; top: 4px; width: 14px; height: 18px; border: 5px solid #ef476f; border-radius: 50%; }
-  .steam { position: absolute; width: 8px; height: 22px; background: #ffffff55; border-radius: 50%; animation: floatUp 2s infinite; }
-  .bread { position: absolute; bottom: calc(12% + 16px); left: 47%; width: 46px; height: 22px; background: #d9a05b; border-radius: 12px; }
+  /* ---------- Objetos ---------- */
+  .table { position: absolute; bottom: 12%; left: 34%; width: 240px; height: 13px;
+    background: linear-gradient(#9c7a52, #7d5f3e); border-radius: 4px; }
+  .table::before, .table::after { content: ''; position: absolute; top: 13px; width: 11px; height: 64px; background: #66502f; }
+  .table::before { left: 18px; } .table::after { right: 18px; }
+  .mug { position: absolute; bottom: calc(12% + 13px); left: 40%; width: 28px; height: 25px;
+    background: linear-gradient(#f0607f, #d94b6b); border-radius: 3px 3px 9px 9px; }
+  .mug::after { content: ''; position: absolute; right: -10px; top: 3px; width: 11px; height: 15px;
+    border: 4px solid #d94b6b; border-radius: 50%; }
+  .steam { position: absolute; width: 6px; height: 16px; background: #ffffff44; border-radius: 50%; animation: floatUp 2.2s infinite; }
+  .bread { position: absolute; bottom: calc(12% + 13px); left: 48%; width: 40px; height: 18px;
+    background: linear-gradient(#e0aa63, #c98f47); border-radius: 10px; }
+  .bread::before { content:''; position: absolute; top: 4px; left: 8px; right: 8px; height: 3px; background: #a9713a55; border-radius: 2px; }
 
-  .sink {
-    position: absolute; bottom: 22%; right: 10%; width: 200px; height: 60px; background: #e0e0e0; border-radius: 10px;
-  }
-  .sink::before { content: ''; position: absolute; top: -26px; left: 70px; width: 14px; height: 30px; background: #aaa; border-radius: 6px; }
-  .mirror {
-    position: absolute; top: 12%; right: 8%; width: 150px; height: 110px;
-    background: linear-gradient(135deg, #bde0fe, #e8f4ff); border: 8px solid #8d6e4a; border-radius: 14px;
-  }
-  .toothbrush {
-    position: absolute; bottom: calc(22% + 58px); right: 16%; width: 60px; height: 10px;
-    background: #06d6a0; border-radius: 6px; transform: rotate(-20deg);
-  }
-  .toothbrush::after { content: ''; position: absolute; left: -12px; top: -2px; width: 14px; height: 8px; background: #fff; border-radius: 3px; }
+  .sink { position: absolute; bottom: 24%; right: 8%; width: 190px; height: 52px;
+    background: linear-gradient(#ececec, #cfcfcf); border-radius: 10px; box-shadow: 0 6px 14px rgba(0,0,0,.3); }
+  .sink::before { content: ''; position: absolute; top: -22px; left: 66px; width: 12px; height: 26px;
+    background: linear-gradient(#c0c0c0, #909090); border-radius: 6px; }
+  .mirror { position: absolute; top: 10%; right: 7%; width: 140px; height: 100px;
+    background: linear-gradient(135deg, #cfe7fb, #eef7ff 55%, #bcd9f0); border: 7px solid #7d5f3e; border-radius: 12px; }
+  .mirror::after { content:''; position: absolute; top: 10px; left: 14px; width: 40%; height: 70%;
+    background: linear-gradient(115deg, #ffffff55, transparent); border-radius: 8px; }
+  .toothbrush { position: absolute; bottom: calc(24% + 50px); right: 14%; width: 52px; height: 8px;
+    background: linear-gradient(#0dc9a0, #0aa584); border-radius: 5px; transform: rotate(-18deg);
+    box-shadow: 0 3px 6px rgba(0,0,0,.3); }
+  .toothbrush::after { content: ''; position: absolute; left: -10px; top: -1px; width: 12px; height: 7px; background: #fff; border-radius: 3px; }
 
-  .bus-stop-sign {
-    position: absolute; bottom: 22%; left: 14%; width: 10px; height: 130px; background: #888;
-  }
-  .bus-stop-sign::before {
-    content: 'ÔNIBUS'; position: absolute; top: -34px; left: -45px; width: 110px; padding: 6px 0;
-    background: #ffd166; color: #333; text-align: center; font-weight: bold; font-size: 13px; border-radius: 6px;
-  }
+  .bus-stop-sign { position: absolute; bottom: 20%; left: 12%; width: 8px; height: 120px; background: #7c8698; }
+  .bus-stop-sign::before { content: 'ÔNIBUS'; position: absolute; top: -30px; left: -42px; width: 96px; padding: 5px 0;
+    background: linear-gradient(#ffdf8a, #f5c95d); color: #4a3b12; text-align: center;
+    font-weight: bold; font-size: 11px; border-radius: 5px; box-shadow: 0 3px 8px rgba(0,0,0,.3); }
 
-  .bus {
-    position: absolute; bottom: 8%; width: 260px; height: 120px; background: #e76f51; border-radius: 14px;
-    display: flex; align-items: center; gap: 8px; padding: 10px;
-  }
-  .bus .win { flex: 1; height: 44px; background: #bde0fe; border-radius: 6px; }
-  .bus .wheel { position: absolute; bottom: -14px; width: 34px; height: 34px; background: #222; border-radius: 50%; }
-  .bus .wheel.l { left: 30px; } .bus .wheel.r { right: 30px; }
-  .bus.drive-in { animation: driveIn 2.4s ease forwards; }
-  .bus.drive-out { animation: driveOut 2.4s ease forwards; }
-  @keyframes driveIn  { from { left: -300px; } to { left: 8%; } }
-  @keyframes driveOut { from { left: 8%; } to { left: 105%; } }
-  .bus.metro { background: #118ab2; border-radius: 18px 18px 8px 8px; }
-  .bus.metro .stripe { position: absolute; top: 60px; left: 0; right: 0; height: 10px; background: #ffd166; }
+  .bus { position: absolute; bottom: 7%; width: 250px; height: 110px; border-radius: 12px;
+    display: flex; align-items: center; gap: 7px; padding: 9px;
+    background: linear-gradient(#f28268, #dd5f42); box-shadow: 0 8px 18px rgba(0,0,0,.35); }
+  .bus .win { flex: 1; height: 40px; background: linear-gradient(#cde9fc, #9cc9e8); border-radius: 5px; }
+  .bus .wheel { position: absolute; bottom: -13px; width: 30px; height: 30px; background: radial-gradient(circle at 40% 40%, #4a4a4a, #171717); border-radius: 50%; }
+  .bus .wheel::after { content:''; position: absolute; inset: 9px; background: #8a8a8a; border-radius: 50%; }
+  .bus .wheel.l { left: 26px; } .bus .wheel.r { right: 26px; }
+  .bus .door { position: absolute; right: 8px; bottom: 8px; width: 20px; height: 52px;
+    background: linear-gradient(#b8d9ee, #8fb8d4); border-radius: 4px; border: 2px solid #00000022; }
+  .bus.drive-in  { animation: driveIn 2.6s cubic-bezier(.3,.7,.4,1) forwards; }
+  .bus.drive-out { animation: driveOut 2.6s cubic-bezier(.6,.05,.7,.4) forwards; }
+  @keyframes driveIn  { from { left: -290px; } to { left: 10%; } }
+  @keyframes driveOut { from { left: 10%; } to { left: 108%; } }
+  .bus.metro { background: linear-gradient(#2ba3cc, #1b7fa3); border-radius: 16px 16px 8px 8px; height: 104px; }
+  .bus.metro .stripe { position: absolute; top: 58px; left: 0; right: 0; height: 8px; background: #ffd166; }
+  .bus.metro .headlight { position: absolute; top: 20px; left: -6px; width: 12px; height: 12px;
+    background: #fff7cf; border-radius: 50%; box-shadow: 0 0 22px #fff7cf; }
 
-  .office-desk {
-    position: absolute; bottom: 14%; width: 220px; height: 14px; background: #8d6e4a; border-radius: 4px;
-  }
-  .coworker { position: absolute; bottom: calc(14% + 14px); width: 60px; height: 110px; }
-  .coworker .head { position: absolute; top: 0; left: 12px; width: 36px; height: 36px; border-radius: 50%; }
-  .coworker .torso { position: absolute; top: 36px; left: 4px; width: 52px; height: 60px; border-radius: 12px; }
-  .coworker .back-head { position: absolute; top: 4px; left: 6px; width: 24px; height: 16px; background: rgba(0,0,0,.15); border-radius: 10px; }
+  .office-desk { position: absolute; bottom: 13%; width: 200px; height: 12px;
+    background: linear-gradient(#9c7a52, #7d5f3e); border-radius: 3px; }
+  .office-desk::before, .office-desk::after { content: ''; position: absolute; top: 12px; width: 9px; height: 58px; background: #66502f; }
+  .office-desk::before { left: 14px; } .office-desk::after { right: 14px; }
+  .monitor { position: absolute; bottom: calc(13% + 12px); width: 42px; height: 30px;
+    background: linear-gradient(#22283a, #161b2a); border-radius: 4px; border: 2px solid #0d1017; }
+  .monitor::after { content:''; position: absolute; inset: 4px; background: linear-gradient(#7fd4ff33, #7fd4ff11); }
+  .coworker { position: absolute; bottom: calc(13% + 12px); width: 58px; height: 100px; }
+  .coworker .head { position: absolute; top: 0; left: 13px; width: 32px; height: 34px; border-radius: 46% 46% 42% 42%; }
+  .coworker .hair { position: absolute; top: -4px; left: 0; right: 0; height: 14px; border-radius: 20px 20px 4px 4px; background: #2e2018; }
+  .coworker .torso { position: absolute; top: 34px; left: 4px; width: 50px; height: 56px; border-radius: 12px 12px 8px 8px; }
+  .coworker .arm { position: absolute; top: 44px; width: 9px; height: 34px; border-radius: 5px; }
+  .coworker .arm.l { left: 0; } .coworker .arm.r { right: 0; }
+  .coworker.typing .arm { animation: type .3s infinite alternate; }
+  @keyframes type { from { transform: rotate(4deg) } to { transform: rotate(-6deg) } }
 
-  .city {
-    position: absolute; bottom: 22%; left: 0; right: 0; height: 34%;
-    display: flex; align-items: flex-end; justify-content: space-around; padding: 0 4%;
-  }
-  .building { width: 12%; height: 70%; background: #2b3850; border-radius: 6px 6px 0 0; position: relative; }
-  .building::before {
-    content: ''; position: absolute; inset: 12% 18%;
-    background: repeating-linear-gradient(#ffd16633 0 10px, transparent 10px 22px);
-  }
+  .streetlight { position: absolute; bottom: 20%; width: 6px; height: 130px; background: #4a5262; }
+  .streetlight::before { content: ''; position: absolute; top: 0; left: -16px; width: 28px; height: 10px;
+    background: #4a5262; border-radius: 6px; }
+  .streetlight::after { content: ''; position: absolute; top: 8px; left: -10px; width: 16px; height: 8px;
+    background: #ffe9a8; border-radius: 4px; box-shadow: 0 6px 30px #ffe9a8aa; }
 
   /* ---------- Painel dos 5 dias ---------- */
-  #week-panel {
-    position: absolute; inset: 0; background: #141824; display: flex; flex-direction: column;
-    align-items: center; justify-content: center; gap: 14px; padding: 4%;
-  }
-  #week-panel h2 { color: #ffd166; font-size: clamp(14px, 2.4vw, 24px); text-align: center; }
-  #week-cells { display: flex; gap: 10px; width: 100%; justify-content: center; }
-  .day-cell {
-    flex: 1; max-width: 150px; aspect-ratio: 1 / 1.15; background: #22304a;
-    border-radius: 10px; position: relative; overflow: hidden; border: 2px solid #3a4a6a;
-  }
-  .day-cell .label {
-    position: absolute; top: 0; left: 0; right: 0; padding: 4px 0; text-align: center;
-    background: #ef476f; color: #fff; font-weight: bold; font-size: clamp(9px, 1.4vw, 13px); z-index: 3;
-  }
-  .day-cell .mini-sky { position: absolute; inset: 0; background: linear-gradient(#2b3a67, #6b5b95 55%, #e8985e); }
-  .day-cell .mini-bed {
-    position: absolute; bottom: 8%; left: 14%; width: 55%; height: 22%;
-    background: #7f5af0; border-radius: 6px;
-  }
-  .day-cell .mini-guy {
-    position: absolute; bottom: 12%; right: 12%; width: 22%; height: 40%;
-  }
-  .day-cell .mini-guy .m-head { position: absolute; top: 0; left: 25%; width: 50%; height: 34%; background: #f2c29b; border-radius: 50%; }
-  .day-cell .mini-guy .m-body { position: absolute; top: 30%; left: 15%; width: 70%; height: 45%; background: #2a9d8f; border-radius: 6px; }
-  .day-cell .mini-guy.bobbing { animation: bob 1.6s infinite ease-in-out; }
-  @keyframes bob { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-12%) } }
-  .day-cell .mini-clock {
-    position: absolute; top: 26%; right: 8%; padding: 2px 6px; background: #1d1d2b;
+  #week-panel { position: absolute; inset: 0; background: linear-gradient(#12151f, #1a2030);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 4%; }
+  #week-panel h2 { color: #ffd166; font-size: clamp(13px, 2.2vw, 21px); text-align: center; }
+  #week-cells { display: flex; gap: 9px; width: 100%; justify-content: center; }
+  .day-cell { flex: 1; max-width: 140px; aspect-ratio: 1 / 1.12; background: #202b44;
+    border-radius: 9px; position: relative; overflow: hidden; border: 2px solid #35446a;
+    transition: border-color .3s, box-shadow .3s; }
+  .day-cell .label { position: absolute; top: 0; left: 0; right: 0; padding: 3px 0; text-align: center;
+    background: #c73e5e; color: #fff; font-weight: bold; font-size: clamp(8px, 1.3vw, 12px); z-index: 3; }
+  .day-cell .mini-sky { position: absolute; inset: 0; background: linear-gradient(#26365f, #6b5b95 55%, #e8985e); }
+  .day-cell .mini-bed { position: absolute; bottom: 7%; left: 10%; width: 52%; height: 20%;
+    background: #7f5af0; border-radius: 5px; }
+  .day-cell .mini-guy { position: absolute; bottom: 11%; right: 13%; width: 24%; height: 38%; }
+  .day-cell .mini-guy .m-head { position: absolute; top: 0; left: 25%; width: 50%; height: 34%;
+    background: #f6cba4; border-radius: 50%; }
+  .day-cell .mini-guy .m-body { position: absolute; top: 30%; left: 15%; width: 70%; height: 46%;
+    background: #2fa393; border-radius: 5px; }
+  .day-cell .mini-guy.bobbing { animation: bob 1.5s infinite ease-in-out; }
+  @keyframes bob { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-10%) } }
+  .day-cell .mini-clock { position: absolute; top: 24%; right: 7%; padding: 1px 5px; background: #16161f;
     border: 2px solid #ef476f; border-radius: 4px; color: #ff5d5d;
-    font-family: monospace; font-size: clamp(8px, 1.3vw, 12px); font-weight: bold;
-  }
-  .day-cell.active-day { border-color: #ffd166; box-shadow: 0 0 18px #ffd16666; }
-  .day-cell .check {
-    position: absolute; bottom: 4px; right: 6px; color: #06d6a0; font-weight: bold; font-size: 18px; opacity: 0; transition: opacity .4s;
-  }
+    font-family: monospace; font-size: clamp(7px, 1.2vw, 11px); font-weight: bold; }
+  .day-cell.active-day { border-color: #ffd166; box-shadow: 0 0 16px #ffd16666; }
+  .day-cell .check { position: absolute; bottom: 3px; right: 5px; color: #0dc9a0;
+    font-weight: bold; font-size: 15px; opacity: 0; transition: opacity .4s; text-shadow: 0 1px 4px #000; }
   .day-cell.done .check { opacity: 1; }
 
   /* ---------- Controles ---------- */
-  #controls { display: flex; gap: 10px; margin-top: 14px; }
-  #controls button {
-    padding: 10px 22px; border: none; border-radius: 8px; font-size: 15px; font-weight: bold;
-    background: #ef476f; color: #fff; cursor: pointer; transition: transform .15s;
-  }
-  #controls button:hover { transform: scale(1.06); }
-  #controls button.secondary { background: #3a4a6a; }
-  #caption {
-    margin-top: 10px; color: #9fb0cc; font-size: 14px; min-height: 20px; text-align: center; max-width: 860px;
-  }
+  #controls { display: flex; gap: 8px; margin-top: 12px; }
+  #controls button { padding: 8px 18px; border: none; border-radius: 7px; font-size: 13px; font-weight: bold;
+    background: #ef476f; color: #fff; cursor: pointer; transition: transform .15s; }
+  #controls button:hover { transform: scale(1.05); }
+  #controls button.secondary { background: #35446a; }
+  #caption { margin-top: 8px; color: #8fa0bd; font-size: 12px; min-height: 16px; text-align: center; max-width: 860px; }
 </style>
 </head>
 <body>
@@ -272,151 +268,167 @@
 
 <div id="stage-wrap">
   <div id="stage">
+    <div class="vignette"></div>
 
-    <!-- Cena 1: Quarto, 5h, narrador acorda -->
+    <!-- Cena 1: Quarto, 5h -->
+    <div class="scene sky-night" id="s0">
+      <div class="stars" id="stars0"></div>
+      <div class="moon"></div>
+      <div class="city"><div class="building" style="height:82%"></div><div class="building" style="height:56%"></div><div class="building" style="height:70%"></div><div class="building" style="height:48%"></div><div class="building" style="height:62%"></div></div>
+      <div class="ground"></div>
+      <div class="clock shaking" id="clock0">5:00</div>
+      <div class="bed"><div class="headboard"></div><div class="pillow"></div><div class="mattress"></div><div class="blanket"></div></div>
+      <div class="char lie" id="c0" style="bottom:15%; left:16%;">
+        <div class="shadow"></div>
+        <div class="head"><div class="hair"></div><div class="ear l"></div><div class="ear r"></div><div class="brow l"></div><div class="brow r"></div><div class="eye l closed"></div><div class="eye r closed"></div><div class="nose"></div><div class="mouth flat"></div></div>
+        <div class="neck"></div><div class="torso"></div><div class="arm l"><div class="hand"></div></div><div class="arm r"><div class="hand"></div></div><div class="leg l"><div class="shoe"></div></div><div class="leg r"><div class="shoe"></div></div>
+      </div>
+      <div class="zzz" style="bottom:58%; left:24%;">Z</div>
+      <div class="zzz" style="bottom:64%; left:29%; animation-delay:.9s;">z</div>
+      <div class="zzz" style="bottom:70%; left:22%; animation-delay:1.7s;">Z</div>
+      <div class="bubble" id="b-clovis-0" style="bottom:46%; left:38%;"><span class="speaker">Clóvis</span><span class="txt"></span></div>
+      <div class="bubble narrator" id="b0"><span class="speaker">Narrador</span><span class="txt"></span></div>
+    </div>
+
+    <!-- Cena 2: Clóvis senta na cama -->
     <div class="scene sky-night" id="s1">
       <div class="stars" id="stars1"></div>
       <div class="moon"></div>
-      <div class="city"><div class="building" style="height:80%"></div><div class="building" style="height:55%"></div><div class="building" style="height:68%"></div><div class="building" style="height:48%"></div></div>
+      <div class="city"><div class="building" style="height:82%"></div><div class="building" style="height:56%"></div><div class="building" style="height:70%"></div><div class="building" style="height:48%"></div><div class="building" style="height:62%"></div></div>
       <div class="ground"></div>
-      <div class="clock" id="clock1">5:00</div>
-      <div class="bed"><div class="pillow"></div><div class="blanket"></div></div>
-      <div class="clovis lying" id="clovis1" style="bottom:14%; left:20%;">
-        <div class="head"><div class="hair"></div><div class="eye l closed"></div><div class="eye r closed"></div><div class="mouth flat"></div></div>
-        <div class="body"></div><div class="arm l"></div><div class="arm r"></div><div class="leg l"><div class="shoe"></div></div><div class="leg r"><div class="shoe"></div></div>
+      <div class="clock calm" id="clock1">5:00</div>
+      <div class="bed"><div class="headboard"></div><div class="pillow"></div><div class="mattress"></div><div class="blanket"></div></div>
+      <div class="char sit" id="c1" style="bottom:15%; left:20%;">
+        <div class="shadow"></div>
+        <div class="head"><div class="hair"></div><div class="ear l"></div><div class="ear r"></div><div class="brow l"></div><div class="brow r"></div><div class="eye l closed"></div><div class="eye r"></div><div class="nose"></div><div class="mouth sad"></div></div>
+        <div class="neck"></div><div class="torso"></div><div class="arm l"><div class="hand"></div></div><div class="arm r"><div class="hand"></div></div><div class="leg l"><div class="shoe"></div></div><div class="leg r"><div class="shoe"></div></div>
       </div>
-      <div class="zzz" style="bottom:60%; left:26%;">Z</div>
-      <div class="zzz" style="bottom:66%; left:30%; animation-delay:.8s;">z</div>
-      <div class="zzz" style="bottom:72%; left:24%; animation-delay:1.6s;">Z</div>
       <div class="bubble narrator" id="b1"><span class="speaker">Narrador</span><span class="txt"></span></div>
     </div>
 
-    <!-- Cena 2: Clóvis olha o relógio -->
-    <div class="scene sky-night" id="s2">
-      <div class="moon"></div>
+    <!-- Cena 3: Levanta e anda -->
+    <div class="scene sky-dawn" id="s2">
+      <div class="sun" style="top:34%; left:74%;"></div>
+      <div class="city"><div class="building" style="height:80%"></div><div class="building" style="height:55%"></div><div class="building" style="height:68%"></div><div class="building" style="height:48%"></div><div class="building" style="height:60%"></div></div>
       <div class="ground"></div>
-      <div class="clock" id="clock2">5:00</div>
-      <div class="bed"><div class="pillow"></div><div class="blanket"></div></div>
-      <div class="clovis sitting" id="clovis2" style="bottom:14%; left:24%;">
-        <div class="head"><div class="hair"></div><div class="eye l"></div><div class="eye r closed"></div><div class="mouth sad"></div></div>
-        <div class="body"></div><div class="arm l"></div><div class="arm r"></div><div class="leg l"><div class="shoe"></div></div><div class="leg r"><div class="shoe"></div></div>
+      <div class="bed" style="left:6%;"><div class="headboard"></div><div class="pillow"></div><div class="mattress"></div><div class="blanket"></div></div>
+      <div class="char" id="c2" style="bottom:12%; left:30%;">
+        <div class="shadow"></div>
+        <div class="head"><div class="hair"></div><div class="ear l"></div><div class="ear r"></div><div class="brow l"></div><div class="brow r"></div><div class="eye l"></div><div class="eye r"></div><div class="nose"></div><div class="mouth flat"></div></div>
+        <div class="neck"></div><div class="torso"></div><div class="arm l"><div class="hand"></div></div><div class="arm r"><div class="hand"></div></div><div class="leg l"><div class="shoe"></div></div><div class="leg r"><div class="shoe"></div></div>
       </div>
-      <div class="bubble" id="b2" style="bottom:52%; left:36%;"><span class="speaker">Clóvis</span><span class="txt"></span></div>
-      <div class="bubble narrator" id="b2n"><span class="speaker">Narrador</span><span class="txt"></span></div>
+      <div class="bubble narrator" id="b2"><span class="speaker">Narrador</span><span class="txt"></span></div>
     </div>
 
-    <!-- Cena 3: Clóvis levanta -->
-    <div class="scene sky-dawn" id="s3">
-      <div class="sun" style="top:30%;"></div>
-      <div class="city"><div class="building" style="height:80%"></div><div class="building" style="height:55%"></div><div class="building" style="height:68%"></div><div class="building" style="height:48%"></div></div>
-      <div class="ground"></div>
-      <div class="bed" style="left:8%;"><div class="pillow"></div><div class="blanket"></div></div>
-      <div class="clovis" id="clovis3" style="bottom:12%; left:46%;">
-        <div class="head"><div class="hair"></div><div class="eye l"></div><div class="eye r"></div><div class="mouth flat"></div></div>
-        <div class="body"></div><div class="arm l"></div><div class="arm r"></div><div class="leg l"><div class="shoe"></div></div><div class="leg r"><div class="shoe"></div></div>
+    <!-- Cena 4: Café da manhã -->
+    <div class="scene indoor" id="s3">
+      <div class="ground" style="background:linear-gradient(#4a4258, #3c3650);"></div>
+      <div class="mirror"></div>
+      <div class="table"></div>
+      <div class="mug"><div class="steam" style="top:-20px; left:8px;"></div><div class="steam" style="top:-20px; left:16px; animation-delay:.8s;"></div></div>
+      <div class="bread"></div>
+      <div class="char sit" id="c3" style="bottom:16%; left:22%;">
+        <div class="shadow"></div>
+        <div class="head"><div class="hair"></div><div class="ear l"></div><div class="ear r"></div><div class="brow l"></div><div class="brow r"></div><div class="eye l"></div><div class="eye r"></div><div class="nose"></div><div class="mouth flat"></div></div>
+        <div class="neck"></div><div class="torso"></div><div class="arm l"><div class="hand"></div></div><div class="arm r"><div class="hand"></div></div><div class="leg l"><div class="shoe"></div></div><div class="leg r"><div class="shoe"></div></div>
       </div>
       <div class="bubble narrator" id="b3"><span class="speaker">Narrador</span><span class="txt"></span></div>
     </div>
 
-    <!-- Cena 4: Café da manhã -->
+    <!-- Cena 5: Não escova os dentes -->
     <div class="scene indoor" id="s4">
-      <div class="ground" style="background:#4a4258;"></div>
+      <div class="ground" style="background:linear-gradient(#4a4258, #3c3650);"></div>
       <div class="mirror"></div>
-      <div class="table"></div>
-      <div class="mug"><div class="steam" style="top:-24px; left:10px;"></div><div class="steam" style="top:-24px; left:20px; animation-delay:.7s;"></div></div>
-      <div class="bread"></div>
-      <div class="clovis sitting" id="clovis4" style="bottom:16%; left:20%;">
-        <div class="head"><div class="hair"></div><div class="eye l"></div><div class="eye r"></div><div class="mouth flat"></div></div>
-        <div class="body"></div><div class="arm l"></div><div class="arm r"></div><div class="leg l"><div class="shoe"></div></div><div class="leg r"><div class="shoe"></div></div>
+      <div class="sink"></div>
+      <div class="toothbrush"></div>
+      <div class="char walk" id="c4" style="bottom:12%; left:14%;">
+        <div class="shadow"></div>
+        <div class="head"><div class="hair"></div><div class="ear l"></div><div class="ear r"></div><div class="brow l"></div><div class="brow r"></div><div class="eye l"></div><div class="eye r"></div><div class="nose"></div><div class="mouth flat"></div></div>
+        <div class="neck"></div><div class="torso"></div><div class="arm l"><div class="hand"></div></div><div class="arm r"><div class="hand"></div></div><div class="leg l"><div class="shoe"></div></div><div class="leg r"><div class="shoe"></div></div>
       </div>
       <div class="bubble narrator" id="b4"><span class="speaker">Narrador</span><span class="txt"></span></div>
     </div>
 
-    <!-- Cena 5: Não escova os dentes -->
-    <div class="scene indoor" id="s5">
-      <div class="ground" style="background:#4a4258;"></div>
-      <div class="mirror"></div>
-      <div class="sink"></div>
-      <div class="toothbrush"></div>
-      <div class="clovis walking" id="clovis5" style="bottom:12%; left:16%;">
-        <div class="head"><div class="hair"></div><div class="eye l"></div><div class="eye r"></div><div class="mouth flat"></div></div>
-        <div class="body"></div><div class="arm l"></div><div class="arm r"></div><div class="leg l"><div class="shoe"></div></div><div class="leg r"><div class="shoe"></div></div>
+    <!-- Cena 6: Primeiro ônibus -->
+    <div class="scene sky-dawn" id="s5">
+      <div class="sun" style="top:38%; left:82%; width:44px; height:44px;"></div>
+      <div class="city"><div class="building" style="height:76%"></div><div class="building" style="height:60%"></div><div class="building" style="height:84%"></div><div class="building" style="height:50%"></div><div class="building" style="height:66%"></div></div>
+      <div class="road"></div>
+      <div class="ground" style="height:6%;"></div>
+      <div class="bus-stop-sign"></div>
+      <div class="bus drive-in" id="bus0"><div class="win"></div><div class="win"></div><div class="win"></div><div class="door"></div><div class="wheel l"></div><div class="wheel r"></div></div>
+      <div class="char" id="c5" style="bottom:8%; left:30%;">
+        <div class="shadow"></div>
+        <div class="head"><div class="hair"></div><div class="ear l"></div><div class="ear r"></div><div class="brow l"></div><div class="brow r"></div><div class="eye l"></div><div class="eye r"></div><div class="nose"></div><div class="mouth flat"></div></div>
+        <div class="neck"></div><div class="torso"></div><div class="arm l"><div class="hand"></div></div><div class="arm r"><div class="hand"></div></div><div class="leg l"><div class="shoe"></div></div><div class="leg r"><div class="shoe"></div></div>
       </div>
       <div class="bubble narrator" id="b5"><span class="speaker">Narrador</span><span class="txt"></span></div>
     </div>
 
-    <!-- Cena 6: Primeiro ônibus -->
-    <div class="scene sky-dawn" id="s6">
-      <div class="sun" style="top:36%; left:80%; width:50px; height:50px;"></div>
-      <div class="city"><div class="building" style="height:75%"></div><div class="building" style="height:60%"></div><div class="building" style="height:82%"></div><div class="building" style="height:50%"></div></div>
+    <!-- Cena 7: Segundo ônibus -->
+    <div class="scene sky-day" id="s6">
+      <div class="sun" style="top:9%; left:78%;"></div>
+      <div class="city"><div class="building" style="height:70%"></div><div class="building" style="height:86%"></div><div class="building" style="height:58%"></div><div class="building" style="height:74%"></div><div class="building" style="height:64%"></div></div>
       <div class="road"></div>
       <div class="ground" style="height:6%;"></div>
-      <div class="bus-stop-sign"></div>
-      <div class="bus drive-in" id="bus1"><div class="win"></div><div class="win"></div><div class="win"></div><div class="wheel l"></div><div class="wheel r"></div></div>
-      <div class="clovis" id="clovis6" style="bottom:8%; left:30%;">
-        <div class="head"><div class="hair"></div><div class="eye l"></div><div class="eye r"></div><div class="mouth flat"></div></div>
-        <div class="body"></div><div class="arm l"></div><div class="arm r"></div><div class="leg l"><div class="shoe"></div></div><div class="leg r"><div class="shoe"></div></div>
+      <div class="bus drive-in" id="bus1" style="background:linear-gradient(#9fd4ee, #6fb3d6);"><div class="win"></div><div class="win"></div><div class="win"></div><div class="door"></div><div class="wheel l"></div><div class="wheel r"></div></div>
+      <div class="char" id="c6" style="bottom:8%; left:32%;">
+        <div class="shadow"></div>
+        <div class="head"><div class="hair"></div><div class="ear l"></div><div class="ear r"></div><div class="brow l"></div><div class="brow r"></div><div class="eye l"></div><div class="eye r"></div><div class="nose"></div><div class="mouth flat"></div></div>
+        <div class="neck"></div><div class="torso"></div><div class="arm l"><div class="hand"></div></div><div class="arm r"><div class="hand"></div></div><div class="leg l"><div class="shoe"></div></div><div class="leg r"><div class="shoe"></div></div>
       </div>
       <div class="bubble narrator" id="b6"><span class="speaker">Narrador</span><span class="txt"></span></div>
     </div>
 
-    <!-- Cena 7: Segundo ônibus -->
-    <div class="scene sky-day" id="s7">
-      <div class="sun" style="top:10%; left:78%;"></div>
-      <div class="city"><div class="building" style="height:70%"></div><div class="building" style="height:85%"></div><div class="building" style="height:58%"></div><div class="building" style="height:74%"></div></div>
-      <div class="road"></div>
-      <div class="ground" style="height:6%;"></div>
-      <div class="bus drive-in" id="bus2" style="background:#8ecae6;"><div class="win"></div><div class="win"></div><div class="win"></div><div class="wheel l"></div><div class="wheel r"></div></div>
-      <div class="clovis" id="clovis7" style="bottom:8%; left:32%;">
-        <div class="head"><div class="hair"></div><div class="eye l"></div><div class="eye r"></div><div class="mouth flat"></div></div>
-        <div class="body"></div><div class="arm l"></div><div class="arm r"></div><div class="leg l"><div class="shoe"></div></div><div class="leg r"><div class="shoe"></div></div>
+    <!-- Cena 8: Metrô -->
+    <div class="scene" id="s7" style="background: linear-gradient(#191926 0%, #262c3b 70%, #1e222c 100%);">
+      <div style="position:absolute; top:10%; left:0; right:0; height:6px; background: repeating-linear-gradient(90deg, #ffd16644 0 40px, transparent 40px 90px);"></div>
+      <div style="position:absolute; bottom:0; left:0; right:0; height:24%; background:linear-gradient(#3a3f4d, #2c303c);"></div>
+      <div class="road" style="bottom:8%; border-top-color:#ffd16633;"></div>
+      <div class="bus metro drive-in" id="metro"><div class="stripe"></div><div class="headlight"></div><div class="win"></div><div class="win"></div><div class="win"></div><div class="win"></div><div class="door"></div><div class="wheel l"></div><div class="wheel r"></div></div>
+      <div class="char" id="c7" style="bottom:10%; left:34%;">
+        <div class="shadow"></div>
+        <div class="head"><div class="hair"></div><div class="ear l"></div><div class="ear r"></div><div class="brow l"></div><div class="brow r"></div><div class="eye l"></div><div class="eye r"></div><div class="nose"></div><div class="mouth flat"></div></div>
+        <div class="neck"></div><div class="torso"></div><div class="arm l"><div class="hand"></div></div><div class="arm r"><div class="hand"></div></div><div class="leg l"><div class="shoe"></div></div><div class="leg r"><div class="shoe"></div></div>
       </div>
       <div class="bubble narrator" id="b7"><span class="speaker">Narrador</span><span class="txt"></span></div>
     </div>
 
-    <!-- Cena 8: Metrô -->
-    <div class="scene" id="s8" style="background: linear-gradient(#1d1d2b 0%, #2c3444 70%, #222 100%);">
-      <div class="tunnel-lights" style="position:absolute; top:12%; left:0; right:0; height:8px; background: repeating-linear-gradient(90deg, #ffd166 0 40px, transparent 40px 90px); opacity:.5;"></div>
-      <div class="road" style="bottom:10%; border-top-color:#ffd16633;"></div>
-      <div class="bus metro drive-in" id="metro"><div class="stripe"></div><div class="win"></div><div class="win"></div><div class="win"></div><div class="win"></div><div class="wheel l"></div><div class="wheel r"></div></div>
-      <div class="clovis" id="clovis8" style="bottom:12%; left:34%;">
-        <div class="head"><div class="hair"></div><div class="eye l"></div><div class="eye r"></div><div class="mouth flat"></div></div>
-        <div class="body"></div><div class="arm l"></div><div class="arm r"></div><div class="leg l"><div class="shoe"></div></div><div class="leg r"><div class="shoe"></div></div>
+    <!-- Cena 9: Trabalho -->
+    <div class="scene" id="s8" style="background: linear-gradient(#5a6478 0%, #7d8899 100%);">
+      <div class="ground" style="background:linear-gradient(#6a6f7d, #5b606c);"></div>
+      <div class="office-desk" style="left:6%;"><div class="monitor" style="left:70px;"></div></div>
+      <div class="office-desk" style="left:38%;"><div class="monitor" style="left:70px;"></div></div>
+      <div class="office-desk" style="left:70%;"><div class="monitor" style="left:70px;"></div></div>
+      <div class="coworker typing" style="left:10%;"><div class="head" style="background:#c9ada7;"><div class="hair"></div></div><div class="torso" style="background:#457b9d;"></div><div class="arm l" style="background:#457b9d;"></div><div class="arm r" style="background:#457b9d;"></div></div>
+      <div class="coworker typing" style="left:42%;"><div class="head" style="background:#e8c39e;"><div class="hair" style="background:#5a3b22;"></div></div><div class="torso" style="background:#6d597a;"></div><div class="arm l" style="background:#6d597a;"></div><div class="arm r" style="background:#6d597a;"></div></div>
+      <div class="coworker typing" style="left:74%;"><div class="head" style="background:#b5838d;"><div class="hair" style="background:#1d1d1d;"></div></div><div class="torso" style="background:#355070;"></div><div class="arm l" style="background:#355070;"></div><div class="arm r" style="background:#355070;"></div></div>
+      <div class="char" id="c8" style="bottom:11%; left:0%;">
+        <div class="shadow"></div>
+        <div class="head"><div class="hair"></div><div class="ear l"></div><div class="ear r"></div><div class="brow l"></div><div class="brow r"></div><div class="eye l"></div><div class="eye r"></div><div class="nose"></div><div class="mouth sad"></div></div>
+        <div class="neck"></div><div class="torso"></div><div class="arm l"><div class="hand"></div></div><div class="arm r"><div class="hand"></div></div><div class="leg l"><div class="shoe"></div></div><div class="leg r"><div class="shoe"></div></div>
       </div>
       <div class="bubble narrator" id="b8"><span class="speaker">Narrador</span><span class="txt"></span></div>
     </div>
 
-    <!-- Cena 9: Chegada ao trabalho -->
-    <div class="scene indoor" id="s9" style="background: linear-gradient(#5a6478 0%, #7d8899 100%);">
-      <div class="ground" style="background:#6a6f7d;"></div>
-      <div class="office-desk" style="left:8%;"></div>
-      <div class="office-desk" style="left:40%;"></div>
-      <div class="office-desk" style="left:72%;"></div>
-      <div class="coworker" style="left:12%;"><div class="head" style="background:#c9ada7;"></div><div class="torso" style="background:#457b9d;"></div><div class="back-head"></div></div>
-      <div class="coworker" style="left:44%;"><div class="head" style="background:#e8c39e;"></div><div class="torso" style="background:#6d597a;"></div><div class="back-head"></div></div>
-      <div class="coworker" style="left:76%;"><div class="head" style="background:#b5838d;"></div><div class="torso" style="background:#355070;"></div><div class="back-head"></div></div>
-      <div class="clovis" id="clovis9" style="bottom:12%; left:2%;">
-        <div class="head"><div class="hair"></div><div class="eye l"></div><div class="eye r"></div><div class="mouth sad"></div></div>
-        <div class="body"></div><div class="arm l"></div><div class="arm r"></div><div class="leg l"><div class="shoe"></div></div><div class="leg r"><div class="shoe"></div></div>
+    <!-- Cena 10: Fim do dia -->
+    <div class="scene sky-dusk" id="s9">
+      <div class="sun" style="top:50%; left:66%; background: radial-gradient(circle at 40% 40%, #ffd0a0, #e8854f); box-shadow: 0 0 55px #e8854faa;"></div>
+      <div class="city"><div class="building" style="height:80%"></div><div class="building" style="height:55%"></div><div class="building" style="height:68%"></div><div class="building" style="height:48%"></div><div class="building" style="height:60%"></div></div>
+      <div class="road"></div>
+      <div class="ground" style="height:6%;"></div>
+      <div class="streetlight" style="left:22%;"></div>
+      <div class="streetlight" style="left:64%;"></div>
+      <div class="char walk" id="c9" style="bottom:8%; left:8%;">
+        <div class="shadow"></div>
+        <div class="head"><div class="hair"></div><div class="ear l"></div><div class="ear r"></div><div class="brow l"></div><div class="brow r"></div><div class="eye l"></div><div class="eye r"></div><div class="nose"></div><div class="mouth sad"></div></div>
+        <div class="neck"></div><div class="torso"></div><div class="arm l"><div class="hand"></div></div><div class="arm r"><div class="hand"></div></div><div class="leg l"><div class="shoe"></div></div><div class="leg r"><div class="shoe"></div></div>
       </div>
       <div class="bubble narrator" id="b9"><span class="speaker">Narrador</span><span class="txt"></span></div>
     </div>
 
-    <!-- Cena 10: Fim do dia -->
-    <div class="scene sky-dusk" id="s10">
-      <div class="sun" style="top:52%; left:68%; background:#f4a261; box-shadow:0 0 60px #f4a261aa;"></div>
-      <div class="city"><div class="building" style="height:80%"></div><div class="building" style="height:55%"></div><div class="building" style="height:68%"></div><div class="building" style="height:48%"></div></div>
-      <div class="road"></div>
-      <div class="ground" style="height:6%;"></div>
-      <div class="clovis walking" id="clovis10" style="bottom:8%; left:20%;">
-        <div class="head"><div class="hair"></div><div class="eye l"></div><div class="eye r"></div><div class="mouth sad"></div></div>
-        <div class="body"></div><div class="arm l"></div><div class="arm r"></div><div class="leg l"><div class="shoe"></div></div><div class="leg r"><div class="shoe"></div></div>
-      </div>
-      <div class="bubble narrator" id="b10"><span class="speaker">Narrador</span><span class="txt"></span></div>
-    </div>
-
     <!-- Cena 11: Painel dos 5 dias -->
-    <div class="scene" id="s11">
+    <div class="scene" id="s10">
       <div id="week-panel">
         <h2>E Clóvis faz isso todo. Santo. Dia. 😴</h2>
         <div id="week-cells">
@@ -433,153 +445,209 @@
 
   <div id="controls">
     <button id="btn-play">▶ Começar</button>
-    <button id="btn-skip" class="secondary">⏭ Próxima cena</button>
+    <button id="btn-skip" class="secondary">⏭ Pular fala</button>
     <button id="btn-restart" class="secondary">↺ Reiniciar</button>
   </div>
-  <div id="caption">Clique em "Começar" para iniciar a rotina do Clóvis. (Ative o som para ouvir as falas 🔊)</div>
+  <div id="caption">Clique em "Começar". As cenas avançam junto com a narração — ative o som 🔊</div>
 </div>
 
 <script>
 const stage = document.getElementById('stage');
 const caption = document.getElementById('caption');
 const scenes = [...document.querySelectorAll('.scene')];
+const wait = ms => new Promise(r => setTimeout(r, ms));
 
-function say(bubbleId, speaker, text, speakIt = true, pitch = 1, rate = 1) {
+/* ---------- Narração: a cena avança quando a fala termina ---------- */
+function pickVoice() {
+  if (!('speechSynthesis' in window)) return null;
+  const vs = speechSynthesis.getVoices();
+  return vs.find(v => v.lang && v.lang.toLowerCase().startsWith('pt-br'))
+      || vs.find(v => v.lang && v.lang.toLowerCase().startsWith('pt'))
+      || null;
+}
+if ('speechSynthesis' in window) speechSynthesis.onvoiceschanged = () => pickVoice();
+
+function speak(text, { pitch = 0.9, rate = 1 } = {}) {
+  return new Promise(resolve => {
+    const est = 900 + text.split(/\s+/).length * 420 / rate;
+    if (!('speechSynthesis' in window)) { setTimeout(resolve, est); return; }
+    let done = false;
+    const finish = () => { if (!done) { done = true; resolve(); } };
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'pt-BR'; u.pitch = pitch; u.rate = rate;
+    const v = pickVoice(); if (v) u.voice = v;
+    u.onend = finish; u.onerror = finish;
+    speechSynthesis.speak(u);
+    setTimeout(finish, est * 2 + 2500);
+  });
+}
+
+function say(bubbleId, who, text, opts = {}) {
   const b = document.getElementById(bubbleId);
   b.querySelector('.txt').textContent = text;
   b.classList.add('show');
-  if (speakIt && 'speechSynthesis' in window) {
-    try {
-      const u = new SpeechSynthesisUtterance(speaker === 'Narrador' ? text : speaker + '. ' + text);
-      u.lang = 'pt-BR'; u.pitch = pitch; u.rate = rate;
-      const vs = speechSynthesis.getVoices();
-      const pt = vs.find(v => v.lang && v.lang.toLowerCase().startsWith('pt'));
-      if (pt) u.voice = pt;
-      speechSynthesis.speak(u);
-    } catch (e) {}
-  }
+  return speak(text, opts);
 }
 function hideBubbles() { document.querySelectorAll('.bubble').forEach(b => b.classList.remove('show')); }
 function showScene(i) { scenes.forEach((s, k) => s.classList.toggle('active', k === i)); }
 
-const wait = ms => new Promise(r => setTimeout(r, ms));
+function moveChar(id, left, pose) {
+  const c = document.getElementById(id);
+  if (pose === 'walk') c.classList.add('walk'); else c.classList.remove('walk');
+  if (left !== null) c.style.left = left;
+}
+
+function beep(times) {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    for (let k = 0; k < times; k++) {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = 'square'; o.frequency.value = 880;
+      g.gain.setValueAtTime(0.06, ctx.currentTime + k * 0.45);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + k * 0.45 + 0.3);
+      o.connect(g); g.connect(ctx.destination);
+      o.start(ctx.currentTime + k * 0.45); o.stop(ctx.currentTime + k * 0.45 + 0.32);
+    }
+  } catch (e) {}
+}
+
+/* ---------- Roteiro (sequência corrigida e sincronizada) ---------- */
+const captions = [
+  '5h da manhã — o despertador dispara.',
+  'Clóvis resiste.',
+  'O alerta do narrador.',
+  'Café da manhã em velocidade recorde.',
+  'A escova de dentes fica pra lá... de novo.',
+  'Primeiro ônibus.',
+  'Segundo ônibus.',
+  'E o metrô.',
+  'Ninguém sorri pra Clóvis.',
+  'O dia acaba.',
+  'Segunda, terça, quarta, quinta, sexta... e recomeça.'
+];
 
 async function playScene(i) {
   hideBubbles();
   showScene(i);
+  caption.textContent = captions[i] || '';
+
   switch (i) {
-    case 0: { // Acorda
-      caption.textContent = 'Segunda-feira, 5 horas da manhã.';
-      const c = document.getElementById('clock1'); c.textContent = '5:00';
-      await wait(600);
-      say('b1', 'Narrador', 'Ei, Clóvis! Você está na hora de acordar... já são 5 horas!', true, 0.8, 0.95);
-      await wait(4200);
-      break;
-    }
-    case 1: { // Olha o relógio
-      caption.textContent = 'Clóvis abre um olho e olha pro relógio...';
-      const c = document.getElementById('clock2'); c.textContent = '5:00';
-      const cl = document.getElementById('clovis2');
-      cl.style.left = '30%';
-      await wait(800);
-      say('b2', 'Clóvis', 'Só mais 5 minutos...', true, 1.2, 0.85);
-      await wait(2600);
-      say('b2n', 'Narrador', 'Clóvis! Se você dormir mais 5 minutos, você vai atrasar. Você tem DOIS ônibus e um metrô pra pegar!', true, 0.8, 1);
-      await wait(5200);
-      break;
-    }
-    case 2: { // Levanta
-      caption.textContent = 'Clóvis levanta, arrastando os pés.';
-      const cl = document.getElementById('clovis3');
-      cl.classList.remove('lying');
+    case 0: {
+      beep(3);
+      await wait(500);
+      await say('b0', 'Narrador', 'Ei, Clóvis! Você está na hora de acordar... já são 5 horas!', { pitch: 0.85, rate: 0.98 });
+      document.getElementById('b0').classList.remove('show');
+      document.getElementById('clock0').classList.replace('shaking', 'calm');
       await wait(400);
-      cl.style.left = '60%';
-      say('b3', 'Narrador', 'E então Clóvis levanta. Arrastando os pés, como sempre.', true, 0.8, 0.95);
-      await wait(3800);
+      document.querySelector('#c0 .eye.l').classList.remove('closed');
+      await wait(600);
+      await say('b-clovis-0', 'Clóvis', 'Só mais 5 minutos...', { pitch: 1.25, rate: 0.9 });
       break;
     }
-    case 3: { // Café
-      caption.textContent = 'Café da manhã em velocidade recorde.';
-      say('b4', 'Narrador', 'Clóvis tenta tomar seu café... mas o relógio não perdoa: dois ônibus e um metrô esperam por ele.', true, 0.8, 0.95);
-      const cl = document.getElementById('clovis4');
-      cl.style.left = '34%';
-      await wait(4600);
+    case 1: {
+      await wait(500);
+      await say('b1', 'Narrador', 'Clóvis! Se você dormir mais 5 minutos, você vai atrasar. Você tem DOIS ônibus e um metrô pra pegar!', { pitch: 0.85, rate: 1.02 });
+      const cl = document.getElementById('c1');
+      cl.querySelector('.eye.l').classList.remove('closed');
+      cl.querySelector('.eye.r').classList.remove('closed');
       break;
     }
-    case 4: { // Não escova os dentes
-      caption.textContent = 'A escova fica pra lá... de novo.';
-      say('b5', 'Narrador', 'E Clóvis NÃO escova os dentes. Mais uma vez. Tudo pra pegar o primeiro ônibus.', true, 0.8, 0.95);
-      const cl = document.getElementById('clovis5');
-      cl.style.left = '48%';
-      await wait(4200);
+    case 2: {
+      await wait(400);
+      const p = say('b2', 'Narrador', 'E então Clóvis levanta. Arrastando os pés, como sempre.', { pitch: 0.85, rate: 0.98 });
+      moveChar('c2', '58%', 'walk');
+      await p;
+      document.getElementById('c2').classList.remove('walk');
       break;
     }
-    case 5: { // Primeiro ônibus
-      caption.textContent = 'Ônibus nº 1.';
-      say('b6', 'Narrador', 'Lá vem o primeiro ônibus. Clóvis mal consegue respirar.', true, 0.8, 0.95);
-      const cl = document.getElementById('clovis6');
-      setTimeout(() => cl.style.left = '55%', 2200);
-      await wait(4400);
+    case 3: {
+      moveChar('c3', '30%', null);
+      await wait(700);
+      await say('b3', 'Narrador', 'Clóvis tenta tomar seu café... mas o relógio não perdoa: dois ônibus e um metrô esperam por ele.', { pitch: 0.85, rate: 1 });
       break;
     }
-    case 6: { // Segundo ônibus
-      caption.textContent = 'Ônibus nº 2.';
-      say('b7', 'Narrador', 'Agora o segundo ônibus. O dia mal começou e Clóvis já correu duas corridas.', true, 0.8, 0.95);
-      const cl = document.getElementById('clovis7');
-      setTimeout(() => cl.style.left = '58%', 2200);
-      await wait(4400);
+    case 4: {
+      moveChar('c4', '46%', 'walk');
+      await wait(900);
+      await say('b4', 'Narrador', 'E Clóvis NÃO escova os dentes. Mais uma vez. Tudo pra pegar o primeiro ônibus.', { pitch: 0.85, rate: 1 });
       break;
     }
-    case 7: { // Metrô
-      caption.textContent = 'E o metrô.';
-      say('b8', 'Narrador', 'E por fim... o metrô. Lotado, apertado, silencioso.', true, 0.8, 0.95);
-      const cl = document.getElementById('clovis8');
-      setTimeout(() => cl.style.left = '60%', 2200);
-      await wait(4400);
+    case 5: {
+      await wait(400);
+      const p = say('b5', 'Narrador', 'Lá vem o primeiro ônibus. Clóvis mal consegue respirar.', { pitch: 0.85, rate: 1 });
+      await wait(2400);
+      moveChar('c5', '52%', 'walk');
+      await p;
+      moveChar('c5', '52%', null);
+      document.getElementById('c5').style.opacity = '0';
+      const bus = document.getElementById('bus0');
+      bus.classList.remove('drive-in'); bus.classList.add('drive-out');
+      await wait(1600);
       break;
     }
-    case 8: { // Trabalho
-      caption.textContent = 'Ninguém sorri pra Clóvis.';
-      say('b9', 'Narrador', 'Eis que Clóvis chega no trabalho... e ninguém dá um sorriso pra ele.', true, 0.8, 0.9);
-      const cl = document.getElementById('clovis9');
-      setTimeout(() => cl.style.left = '20%', 500);
-      await wait(4600);
+    case 6: {
+      await wait(400);
+      const p = say('b6', 'Narrador', 'Agora o segundo ônibus. O dia mal começou e Clóvis já correu duas corridas.', { pitch: 0.85, rate: 1 });
+      await wait(2400);
+      moveChar('c6', '54%', 'walk');
+      await p;
+      moveChar('c6', '54%', null);
+      document.getElementById('c6').style.opacity = '0';
+      const bus = document.getElementById('bus1');
+      bus.classList.remove('drive-in'); bus.classList.add('drive-out');
+      await wait(1600);
       break;
     }
-    case 9: { // Fim do dia
-      caption.textContent = 'O dia acaba... e amanhã tem mais.';
-      say('b10', 'Narrador', 'O dia acaba. E Clóvis vai fazer a mesma rotina de amanhã de manhã.', true, 0.8, 0.9);
-      const cl = document.getElementById('clovis10');
-      setTimeout(() => cl.style.left = '70%', 300);
-      await wait(4600);
+    case 7: {
+      await wait(400);
+      const p = say('b7', 'Narrador', 'E por fim... o metrô. Lotado, apertado, silencioso.', { pitch: 0.85, rate: 0.98 });
+      await wait(2400);
+      moveChar('c7', '56%', 'walk');
+      await p;
+      moveChar('c7', '56%', null);
+      document.getElementById('c7').style.opacity = '0';
+      const metro = document.getElementById('metro');
+      metro.classList.remove('drive-in'); metro.classList.add('drive-out');
+      await wait(1600);
       break;
     }
-    case 10: { // Painel 5 dias
-      caption.textContent = 'Segunda, terça, quarta, quinta, sexta... e recomeça.';
+    case 8: {
+      moveChar('c8', '22%', 'walk');
+      await wait(600);
+      await say('b8', 'Narrador', 'Eis que Clóvis chega no trabalho... e ninguém dá um sorriso pra ele.', { pitch: 0.85, rate: 0.95 });
+      break;
+    }
+    case 9: {
+      moveChar('c9', '74%', 'walk');
+      await wait(600);
+      await say('b9', 'Narrador', 'O dia acaba. E Clóvis vai fazer a mesma rotina de amanhã de manhã.', { pitch: 0.85, rate: 0.95 });
+      break;
+    }
+    case 10: {
       const cells = [...document.querySelectorAll('.day-cell')];
       cells.forEach(c => c.classList.remove('done', 'active-day'));
-      say('b10', 'Narrador', 'Clóvis faz isso todo dia.', true, 0.8, 0.9);
+      const p = say('b9', 'Narrador', 'Clóvis faz isso todo dia.', { pitch: 0.85, rate: 0.95 });
       for (let k = 0; k < cells.length; k++) {
         cells.forEach((c, j) => c.classList.toggle('active-day', j === k));
         cells[k].classList.add('done');
-        await wait(700);
+        await wait(750);
       }
-      await wait(1800);
+      await p;
+      await wait(1500);
       break;
     }
   }
 }
 
-let playing = false, current = 0, timer = null;
+let playing = false, current = 0;
 
 async function runFrom(start) {
   playing = true;
   current = start;
-  while (playing && current < scenes.length) {
+  while (playing) {
     await playScene(current);
     if (!playing) break;
-    current++;
-    if (current >= scenes.length) current = 0; // loop infinito: todo dia é igual
+    current = (current + 1) % scenes.length;
   }
 }
 
@@ -588,29 +656,22 @@ document.getElementById('btn-play').onclick = e => {
   e.target.textContent = '⏸ Rodando...';
   runFrom(0);
 };
-document.getElementById('btn-skip').onclick = () => { if (playing) current = (current + 1) % scenes.length; };
-document.getElementById('btn-restart').onclick = () => {
-  playing = false;
-  if ('speechSynthesis' in window) speechSynthesis.cancel();
-  document.querySelectorAll('.day-cell').forEach(c => c.classList.remove('done', 'active-day'));
-  hideBubbles();
-  setTimeout(() => {
-    document.getElementById('btn-play').textContent = '▶ Começar';
-    showScene(0); caption.textContent = 'Clique em "Começar" para iniciar a rotina do Clóvis.';
-  }, 100);
+document.getElementById('btn-skip').onclick = () => {
+  if (playing && 'speechSynthesis' in window) speechSynthesis.cancel();
 };
+document.getElementById('btn-restart').onclick = () => location.reload();
 
-if ('speechSynthesis' in window) speechSynthesis.getVoices();
-
-// estrelas
-const stars1 = document.getElementById('stars1');
-for (let k = 0; k < 40; k++) {
-  const s = document.createElement('div');
-  s.className = 'star';
-  s.style.left = Math.random() * 100 + '%';
-  s.style.top = Math.random() * 55 + '%';
-  s.style.animationDelay = (Math.random() * 2) + 's';
-  stars1.appendChild(s);
+/* estrelas */
+for (const holder of ['stars0', 'stars1']) {
+  const box = document.getElementById(holder);
+  for (let k = 0; k < 36; k++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    s.style.left = Math.random() * 100 + '%';
+    s.style.top = Math.random() * 55 + '%';
+    s.style.animationDelay = (Math.random() * 2.4) + 's';
+    box.appendChild(s);
+  }
 }
 </script>
 </body>
